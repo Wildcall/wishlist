@@ -11,16 +11,33 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    name: CI wishlist
+    env:
+      JDBC_DATABASE_URL: jdbc:postgresql://localhost:5432/wishlist_data
+      JDBC_DATABASE_USERNAME: wishlist_user
+      JDBC_DATABASE_PASSWORD: wishlist_password
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 8
-      uses: actions/setup-java@v3
-      with:
-        java-version: '8'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      - name: Check out repository
+        uses: actions/checkout@v1
+
+      - name: Build the docker-compose stack
+        run: docker-compose up -d
+
+      - name: Sleep
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '60s'
+
+      - name: Check running containers
+        run: docker ps
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml

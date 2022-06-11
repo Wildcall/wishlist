@@ -1,0 +1,26 @@
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="12.06.2022-init" author="Nikolay Malygin">
+        <createTable tableName="_user">
+            <column name="id"                       type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="email"                    type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password"                 type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_action_time"         type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="create_time"              type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

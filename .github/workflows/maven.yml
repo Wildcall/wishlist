@@ -21,6 +21,9 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v1
 
+      - name: Show files in directory
+        run: ls
+        
       - name: Build the docker-compose stack
         run: docker-compose up -d
 

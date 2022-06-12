@@ -8,10 +8,18 @@ server:
 spring:
   application:
     name: wishlist
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            clientId: ${GITHUB_CLIENT_ID}
+            clientSecret: ${GITHUB_CLIENT_SECRET}
+  #            redirect-uri: http://localhost:8080/
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: false
+    show-sql: true
   datasource:
     url: ${JDBC_DATABASE_URL}
     username: ${JDBC_DATABASE_USERNAME}

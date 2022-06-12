@@ -1,6 +1,9 @@
 <template>
   <div>
-    Hello
+    With Google: <a href="/oauth2/authorization/google">click here</a>
+  </div>
+  <div>
+    Logout: <a href="/logout">click here</a>
   </div>
 </template>
 

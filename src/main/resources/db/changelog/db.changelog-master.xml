@@ -23,4 +23,84 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="14.06.2022_add_base_entity" author="Nikolay Malygin">
+        <createTable tableName="_event">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="_event" baseColumnNames="user_email"
+                                 constraintName="_event_user_email_user_email"
+                                 referencedTableName="_user" referencedColumnNames="email"
+                                 deleteCascade="true"/>
+
+        <createTable tableName="_gift">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="link" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="picture" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reserved" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="_gift" baseColumnNames="user_email"
+                                 constraintName="_gift_user_email_user_email"
+                                 referencedTableName="_user" referencedColumnNames="email"
+                                 deleteCascade="true"/>
+
+        <createTable tableName="_event_gift">
+            <column name="event_id" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="gift_id" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="_event_gift" baseColumnNames="gift_id"
+                                 constraintName="_event_gift_gift_id_gift_id"
+                                 referencedTableName="_gift" referencedColumnNames="id"
+                                 deleteCascade="true"/>
+        <addForeignKeyConstraint baseTableName="_event_gift" baseColumnNames="event_id"
+                                 constraintName="_event_gift_event_id_gift_id"
+                                 referencedTableName="_event" referencedColumnNames="id"
+                                 deleteCascade="true"/>
+
+        <createTable tableName="_user_giving_gift">
+            <column name="user_email" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="gift_id" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="_user_giving_gift" baseColumnNames="user_email"
+                                 constraintName="_user_giving_gift_user_email_user_email"
+                                 referencedTableName="_user" referencedColumnNames="email"
+                                 deleteCascade="true"/>
+        <addForeignKeyConstraint baseTableName="_user_giving_gift" baseColumnNames="gift_id"
+                                 constraintName="_user_giving_gift_gift_id_gift_id"
+                                 referencedTableName="_gift" referencedColumnNames="id"
+                                 deleteCascade="true"/>
+    </changeSet>
+
 </databaseChangeLog>

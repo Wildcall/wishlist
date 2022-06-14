@@ -43,7 +43,6 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         SecurityContextHolder
                 .getContext()
                 .setAuthentication(authentication);
-        objectMapper.writeValue(response.getOutputStream(), "Success login");
     }
 
     @Override

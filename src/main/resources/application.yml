@@ -4,6 +4,7 @@ server:
     include-stacktrace: never
     whitelabel:
       enabled: false
+    path: /error
 
 spring:
   application:

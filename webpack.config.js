@@ -5,7 +5,7 @@ const {merge} = require('webpack-merge');
 const {VueLoaderPlugin} = require('vue-loader')
 
 const PATHS = {
-    entry: path.join(__dirname, 'src', 'main', 'resources', 'js', 'main.ts'),
+    entry: path.join(__dirname, 'src', 'main', 'resources', 'js', 'main.js'),
     output: path.resolve(__dirname, 'src', 'main', 'resources', 'static', 'js'),
 }
 
@@ -14,12 +14,9 @@ const commonConfig = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
+                test: /\.js$/,
                 exclude: '/node_modules/',
-                loader: 'ts-loader',
-                options: {
-                    appendTsSuffixTo: [/\.vue$/],
-                  }
+                loader: 'babel-loader',
             },
             {
                 test: /\.vue$/,
@@ -38,7 +35,6 @@ const commonConfig = {
         new VueLoaderPlugin()
     ],
     resolve: {
-        extensions: ['.tsx', '.ts', '.js'],
         modules: [
             path.join(__dirname, 'src', 'main', 'resources', 'js'),
             path.join(__dirname, 'node_modules'),
@@ -72,7 +68,7 @@ const developmentConfig = {
             },
         },
         allowedHosts: [
-            'localhost:8080'
+            'localhost:9000'
         ],
         compress: true,
         port: 8000

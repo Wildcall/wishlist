@@ -4,6 +4,8 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 public interface UserExtractor {
 
-    void extract(String clientRegistrationId,
-                 OidcUser oidcUser);
+    void extractAndSave(String clientRegistrationId,
+                        OidcUser oidcUser);
+
+    String extractEmail();
 }

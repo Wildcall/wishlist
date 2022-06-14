@@ -2,6 +2,7 @@ package ru.rumal.wishlist.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,7 +16,6 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import ru.rumal.wishlist.service.UserExtractor;
 
 @Slf4j
@@ -28,21 +28,24 @@ public class WebSecurityConfig {
     private final AuthenticationEntryPoint customAuthenticationEntryPoint;
     private final AccessDeniedHandler customAccessDeniedHandler;
     private final UsernamePasswordAuthenticationFilter customAuthenticationFilter;
-    private final LogoutSuccessHandler customLogoutSuccessHandler;
+
+    @Value("${spring.profile.active:prod}")
+    private String profile;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         customAuthenticationFilter.setFilterProcessesUrl("/api/v1/auth/login");
         //  @formatter:off
+        if ("dev".equals(profile))
+            http.csrf().disable();
         return http
-                .csrf().disable()
                 .formLogin().disable()
                 .httpBasic().disable()
                 .authorizeRequests(r -> r
                         .antMatchers(HttpMethod.GET, "/js/*").permitAll()
                         .antMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
                         .antMatchers(HttpMethod.GET, "/").permitAll()
-                        .antMatchers(HttpMethod.POST, "/api/v1/auth/registration").permitAll()
+                        .antMatchers(HttpMethod.POST, "/api/v1/user/registration").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/auth/logout").permitAll()
                         .anyRequest().authenticated())
@@ -54,12 +57,13 @@ public class WebSecurityConfig {
                     .accessDeniedHandler(customAccessDeniedHandler)
                 .and()
                 .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("/")
                         .userInfoEndpoint(userInfo -> userInfo
                                 .oidcUserService(this.oidcUserService())))
                 .addFilter(customAuthenticationFilter)
                 .logout(l -> l
                         .logoutUrl("/api/v1/auth/logout")
-                        .logoutSuccessHandler(customLogoutSuccessHandler)
+                        .logoutSuccessUrl("/")
                         .clearAuthentication(true)
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
@@ -76,7 +80,7 @@ public class WebSecurityConfig {
                     .getClientRegistration()
                     .getRegistrationId();
             OidcUser oidcUser = delegate.loadUser(userRequest);
-            userExtractor.extract(clientRegistrationId, oidcUser);
+            userExtractor.extractAndSave(clientRegistrationId, oidcUser);
             return oidcUser;
         };
     }

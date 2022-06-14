@@ -6,11 +6,12 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
 import ru.rumal.wishlist.model.dto.BaseDto;
+import ru.rumal.wishlist.model.dto.UserDto;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,6 +28,29 @@ public class User implements BaseEntity {
     private String picture;
     private Boolean enable;
 
+    @ToString.Exclude
+    @OneToMany(mappedBy = "user",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
+    private List<Event> events;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "user",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
+    private List<Gift> gifts;
+
+    @ToString.Exclude
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "_user_giving_gift",
+            joinColumns = @JoinColumn(name = "user_email"),
+            inverseJoinColumns = @JoinColumn(name = "gift_id")
+    )
+    private Set<Gift> givingGiftsSet;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -42,6 +66,9 @@ public class User implements BaseEntity {
 
     @Override
     public BaseDto toBaseDto() {
-        return null;
+        return new UserDto(this.email,
+                           this.password,
+                           this.name,
+                           this.picture);
     }
 }

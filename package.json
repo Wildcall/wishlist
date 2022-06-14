@@ -2,67 +2,40 @@
   "name": "wishlist",
   "version": "0.1.0",
   "private": true,
+  "main": "main.js",
+  "license": "MIT",
   "scripts": {
     "dev": "webpack-dev-server --mode development",
-    "build": "webpack --mode production",
-    "lint": "vue-cli-service lint"
+    "build": "webpack --mode production"
   },
   "dependencies": {
-    "core-js": "^3.8.3",
-    "vue": "^3.2.13",
-    "vue-class-component": "^7.2.6",
-    "vue-property-decorator": "^9.1.2",
     "pinia": "^2.0.14",
-    "vuetify": "npm:@vuetify/nightly@next"
+    "vue": "^2.6.14",
+    "vue-resource": "^1.5.3",
+    "vuetify": "^2.6.4"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.4.0",
-    "@typescript-eslint/parser": "^5.4.0",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
-    "@vue/cli-plugin-typescript": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
-    "@vue/eslint-config-typescript": "^9.1.0",
+    "@vue/composition-api": "^1.6.1",
+    "@babel/core": "^7.17.8",
+    "@babel/preset-env": "^7.16.11",
+    "@vue/compiler-sfc": "^3.2.31",
+    "babel-loader": "^8.2.4",
     "clean-webpack-plugin": "^4.0.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3",
+    "css-loader": "^6.7.1",
     "html-webpack-plugin": "^5.5.0",
-    "lint-staged": "^11.1.2",
-    "ts-loader": "^9.3.0",
-    "typescript": "~4.5.5",
-    "vue-loader": "^17.0.0",
+    "path": "^0.12.7",
+    "vue-loader": "^15.9.8",
+    "vue-style-loader": "^4.1.3",
     "vue-template-compiler": "^2.6.14",
-    "vuetify-loader": "^2.0.0-alpha.0",
-    "webpack": "^5.73.0",
+    "webpack": "^5.70.0",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.9.2",
+    "webpack-dev-server": "^4.7.4",
     "webpack-merge": "^5.8.0"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/vue3-essential",
-      "eslint:recommended",
-      "@vue/typescript/recommended"
-    ],
-    "parserOptions": {
-      "ecmaVersion": 2020
-    },
-    "rules": {}
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
     "not dead",
     "not ie 11"
-  ],
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "lint-staged": {
-    "*.{js,jsx,vue,ts,tsx}": "vue-cli-service lint"
-  }
+  ]
 }

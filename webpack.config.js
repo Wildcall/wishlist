@@ -14,9 +14,12 @@ const commonConfig = {
     module: {
         rules: [
             {
-                test: /\.ts$/,
+                test: /\.tsx?$/,
                 exclude: '/node_modules/',
-                loader: 'babel-loader',
+                loader: 'ts-loader',
+                options: {
+                    appendTsSuffixTo: [/\.vue$/],
+                  }
             },
             {
                 test: /\.vue$/,
@@ -35,6 +38,7 @@ const commonConfig = {
         new VueLoaderPlugin()
     ],
     resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
         modules: [
             path.join(__dirname, 'src', 'main', 'resources', 'js'),
             path.join(__dirname, 'node_modules'),

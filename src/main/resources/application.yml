@@ -13,8 +13,8 @@ spring:
       client:
         registration:
           google:
-            clientId: ${GITHUB_CLIENT_ID}
-            clientSecret: ${GITHUB_CLIENT_SECRET}
+            clientId: ${GOOGLE_CLIENT_ID}
+            clientSecret: ${GOOGLE_CLIENT_SECRET}
   #            redirect-uri: http://localhost:8080/
   jpa:
     hibernate:

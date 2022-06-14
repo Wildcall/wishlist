@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
-import ru.rumal.wishlist.model.User;
+import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.service.UserExtractor;
 import ru.rumal.wishlist.service.UserService;
 

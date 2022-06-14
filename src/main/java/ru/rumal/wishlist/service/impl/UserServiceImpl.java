@@ -3,9 +3,11 @@ package ru.rumal.wishlist.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.rumal.wishlist.model.User;
+import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.UserRepo;
 import ru.rumal.wishlist.service.UserService;
+
+import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -15,10 +17,15 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
 
     @Override
-    public void save(User user) {
+    public Optional<User> save(User user) {
         if (existByEmail(user.getEmail()))
-            return;
-        userRepo.save(user);
+            return Optional.empty();
+        return Optional.of(userRepo.save(user));
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepo.findByEmail(email);
     }
 
     @Override

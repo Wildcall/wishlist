@@ -1,7 +1,7 @@
 package ru.rumal.wishlist.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import ru.rumal.wishlist.model.User;
+import ru.rumal.wishlist.model.entity.User;
 
 import java.util.Optional;
 

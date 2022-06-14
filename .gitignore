@@ -55,4 +55,5 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-/node/
+/node
+/src/main/resources/static/js/

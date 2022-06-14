@@ -1,10 +1,11 @@
-package ru.rumal.wishlist.model;
+package ru.rumal.wishlist.model.entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
+import ru.rumal.wishlist.model.dto.BaseDto;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -37,5 +38,10 @@ public class User implements BaseEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    @Override
+    public BaseDto toBaseDto() {
+        return null;
     }
 }

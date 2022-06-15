@@ -42,7 +42,7 @@ public class WebSecurityConfig {
                 .formLogin().disable()
                 .httpBasic().disable()
                 .authorizeRequests(r -> r
-                        .antMatchers(HttpMethod.GET, "/js/*").permitAll()
+                        .antMatchers("/js/*", "/assets/*").permitAll()
                         .antMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
                         .antMatchers(HttpMethod.GET, "/").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/user/registration").permitAll()

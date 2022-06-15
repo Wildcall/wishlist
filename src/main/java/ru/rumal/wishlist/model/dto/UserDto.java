@@ -17,13 +17,14 @@ import javax.validation.constraints.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDto implements BaseDto {
 
-    @NotNull(groups = {View.New.class})
-    @NotBlank(groups = {View.New.class})
-    @NotEmpty(groups = {View.New.class})
-    @Email(groups = {View.New.class}, regexp = "^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$")
+    @NotNull(groups = {View.New.class, View.Update.class})
+    @NotBlank(groups = {View.New.class, View.Update.class})
+    @NotEmpty(groups = {View.New.class, View.Update.class})
+    @Email(groups = {View.New.class, View.Update.class}, regexp = "^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,})$")
     @JsonView(View.Response.class)
     private String email;
 
+    @Null(groups = {View.Update.class})
     @NotNull(groups = {View.New.class})
     @NotBlank(groups = {View.New.class})
     @NotEmpty(groups = {View.New.class})
@@ -31,14 +32,14 @@ public class UserDto implements BaseDto {
     @JsonView(View.Private.class)
     private String password;
 
-    @NotNull(groups = {View.New.class})
-    @NotBlank(groups = {View.New.class})
-    @NotEmpty(groups = {View.New.class})
-    @Length(groups = {View.New.class}, min = 2, max = 24)
+    @NotNull(groups = {View.New.class, View.Update.class})
+    @NotBlank(groups = {View.New.class, View.Update.class})
+    @NotEmpty(groups = {View.New.class, View.Update.class})
+    @Length(groups = {View.New.class, View.Update.class}, min = 2, max = 24)
     @JsonView(View.Response.class)
     private String name;
 
-    @Null(groups = {View.New.class})
+    @Null(groups = {View.New.class, View.Update.class})
     @JsonView(View.Response.class)
     private String picture;
 

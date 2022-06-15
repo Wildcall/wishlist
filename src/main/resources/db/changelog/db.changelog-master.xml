@@ -103,4 +103,32 @@
                                  deleteCascade="true"/>
     </changeSet>
 
+    <changeSet id="15.06.2022" author="Nikolay Malygin">
+        <addColumn tableName="_event">
+            <column name="description" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <dropColumn tableName="_gift" columnName="reserved"/>
+        <addColumn tableName="_gift">
+            <column name="description" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <createTable tableName="_basic_event">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

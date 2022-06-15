@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import ru.rumal.wishlist.model.GiftStatus;
 import ru.rumal.wishlist.model.dto.BaseDto;
 
 import javax.persistence.*;
@@ -22,7 +23,10 @@ public class Gift implements BaseEntity {
     private String name;
     private String link;
     private String picture;
-    private Boolean reserved;
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    private GiftStatus status;
 
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,6 +36,7 @@ public class Gift implements BaseEntity {
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "givingGiftsSet")
     private Set<User> giversSet;
 
+    @ToString.Exclude
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "gifts")
     private Set<Event> eventsSet;
 

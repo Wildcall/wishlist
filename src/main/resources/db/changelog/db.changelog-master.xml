@@ -131,4 +131,17 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="remove_nullable_on_gift" author="Nikolay Malygin">
+        <dropColumn tableName="_gift" columnName="picture"/>
+        <dropColumn tableName="_gift" columnName="link"/>
+        <addColumn tableName="_gift">
+            <column name="picture" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="link" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

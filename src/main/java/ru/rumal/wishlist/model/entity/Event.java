@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import ru.rumal.wishlist.model.dto.BaseDto;
+import ru.rumal.wishlist.model.dto.EventDto;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -32,15 +33,18 @@ public class Event implements BaseEntity {
 
     @ToString.Exclude
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "_event_gift",
+    @JoinTable(name = "_event_gift",
             joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "gift_id")
-    )
+            inverseJoinColumns = @JoinColumn(name = "gift_id"))
     private Set<Gift> gifts;
 
     @Override
     public BaseDto toBaseDto() {
-        return null;
+        EventDto event = new EventDto();
+        event.setId(this.id);
+        event.setName(this.name);
+        event.setDescription(this.description);
+        event.setDate(this.date);
+        return event;
     }
 }

@@ -45,6 +45,7 @@ public class WebSecurityConfig {
                         .antMatchers(HttpMethod.GET, "/js/*").permitAll()
                         .antMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
                         .antMatchers(HttpMethod.GET, "/").permitAll()
+                        .antMatchers(HttpMethod.GET, "/error").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/user/registration").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/auth/logout").permitAll()

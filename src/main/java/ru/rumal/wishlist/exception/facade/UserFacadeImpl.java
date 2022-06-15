@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.facade;
+package ru.rumal.wishlist.exception.facade;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

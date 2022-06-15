@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.facade;
+package ru.rumal.wishlist.exception.facade;
 
 import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.GiftDto;

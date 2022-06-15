@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.rumal.wishlist.model.GiftStatus;
 import ru.rumal.wishlist.model.dto.BaseDto;
+import ru.rumal.wishlist.model.dto.GiftDto;
 
 import javax.persistence.*;
 import java.util.Set;
@@ -24,7 +25,6 @@ public class Gift implements BaseEntity {
     private String link;
     private String picture;
     private String description;
-
     @Enumerated(EnumType.STRING)
     private GiftStatus status;
 
@@ -42,6 +42,13 @@ public class Gift implements BaseEntity {
 
     @Override
     public BaseDto toBaseDto() {
-        return null;
+        GiftDto gift = new GiftDto();
+        gift.setId(this.id);
+        gift.setName(this.name);
+        gift.setLink(this.link);
+        gift.setPicture(this.picture);
+        gift.setDescription(this.description);
+        gift.setStatus(this.status);
+        return gift;
     }
 }

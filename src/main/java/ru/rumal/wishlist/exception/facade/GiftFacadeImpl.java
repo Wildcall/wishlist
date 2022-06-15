@@ -1,19 +1,19 @@
-package ru.rumal.wishlist.facade;
+package ru.rumal.wishlist.exception.facade;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.model.dto.BaseDto;
-import ru.rumal.wishlist.model.dto.EventDto;
+import ru.rumal.wishlist.model.dto.GiftDto;
 
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class EventFacadeImpl implements EventFacade {
+public class GiftFacadeImpl implements GiftFacade {
     @Override
-    public BaseDto create(EventDto eventDto) {
+    public BaseDto create(GiftDto giftDto) {
         return null;
     }
 
@@ -23,13 +23,13 @@ public class EventFacadeImpl implements EventFacade {
     }
 
     @Override
-    public Long delete(Long id) {
+    public BaseDto update(Long id,
+                          GiftDto giftDto) {
         return null;
     }
 
     @Override
-    public BaseDto update(Long id,
-                          EventDto eventDto) {
+    public Long delete(Long id) {
         return null;
     }
 }

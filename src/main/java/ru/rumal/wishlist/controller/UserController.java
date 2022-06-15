@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.rumal.wishlist.exception.facade.UserFacade;
+import ru.rumal.wishlist.facade.UserFacade;
 import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.UserDto;
 import ru.rumal.wishlist.model.dto.View;

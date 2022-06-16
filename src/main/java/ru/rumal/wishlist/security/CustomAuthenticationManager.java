@@ -3,13 +3,13 @@ package ru.rumal.wishlist.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.service.UserService;
 
 import java.util.ArrayList;
@@ -29,16 +29,13 @@ public class CustomAuthenticationManager implements AuthenticationManager {
                 .getCredentials()
                 .toString();
 
-        User user = userService
-                .findByEmail(email)
-                .orElse(null);
+        UserDetails user = userService.loadUserByUsername(email);
 
-        if (user != null
-                && user.getPassword() != null
+        if (user.getPassword() != null
                 && passwordEncoder.matches(password, user.getPassword())) {
             return new UsernamePasswordAuthenticationToken(email, password, new ArrayList<>());
         }
 
-        throw new UsernameNotFoundException("Email not found");
+        throw new BadCredentialsException("Bad credentials");
     }
 }

@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 import ru.rumal.wishlist.exception.ApiError;
+import ru.rumal.wishlist.model.dto.View;
+import ru.rumal.wishlist.model.entity.User;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
@@ -43,6 +45,10 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         SecurityContextHolder
                 .getContext()
                 .setAuthentication(authentication);
+        User principal = (User) authentication.getPrincipal();
+        objectMapper
+                .writerWithView(View.Response.class)
+                .writeValue(response.getOutputStream(), principal.toBaseDto());
     }
 
     @Override

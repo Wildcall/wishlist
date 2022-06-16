@@ -10,10 +10,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static ru.rumal.wishlist.integration.utils.HttpResponseApiError.isApiError;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -74,10 +75,6 @@ class MainControllerTest {
                 .perform(get("/private_page"))
                 .andDo(print())
                 .andExpect(status().isForbidden())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.timestamp", matchesPattern("\\d\\d-\\d\\d-\\d\\d\\d\\d\\s\\d\\d:\\d\\d:\\d\\d")))
-                .andExpect(jsonPath("$.status", is("FORBIDDEN")))
-                .andExpect(jsonPath("$.message", is("Access denied")))
-                .andExpect(jsonPath("$.subErrors", nullValue()));
+                .andExpectAll(isApiError("Access denied", "FORBIDDEN"));
     }
 }

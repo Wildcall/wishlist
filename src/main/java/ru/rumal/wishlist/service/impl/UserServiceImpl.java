@@ -42,6 +42,6 @@ public class UserServiceImpl implements UserService {
                 .findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
 
-        return user.toUserDetails();
+        return user;
     }
 }

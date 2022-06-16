@@ -33,7 +33,7 @@ public class CustomAuthenticationManager implements AuthenticationManager {
 
         if (user.getPassword() != null
                 && passwordEncoder.matches(password, user.getPassword())) {
-            return new UsernamePasswordAuthenticationToken(email, password, new ArrayList<>());
+            return new UsernamePasswordAuthenticationToken(user, password, new ArrayList<>());
         }
 
         throw new BadCredentialsException("Bad credentials");

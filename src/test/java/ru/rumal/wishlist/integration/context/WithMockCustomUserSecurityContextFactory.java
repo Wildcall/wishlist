@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.integration.controller.context;
+package ru.rumal.wishlist.integration.context;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

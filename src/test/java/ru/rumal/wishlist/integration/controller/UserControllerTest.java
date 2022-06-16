@@ -19,8 +19,7 @@ import ru.rumal.wishlist.repository.UserRepo;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.rumal.wishlist.integration.utils.HttpRequestBuilder.postJson;
@@ -70,12 +69,12 @@ class UserControllerTest {
                                          .getCorrectPasswordDecrypt())
                                  .with(csrf()))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.email", is(correctUser.getEmail())))
-                .andExpect(jsonPath("$.name", is(correctUser.getName())))
-                .andExpect(jsonPath("$.picture", is(correctUser.getPicture())))
-                .andExpect(jsonPath("$.password").doesNotExist());
+                .andExpectAll(status().isOk(),
+                              content().contentType("application/json"),
+                              jsonPath("$.email", is(correctUser.getEmail())),
+                              jsonPath("$.name", is(correctUser.getName())),
+                              jsonPath("$.picture", is(correctUser.getPicture())),
+                              jsonPath("$.password").doesNotExist());
     }
 
     @DisplayName("Return error when credentials is not valid")
@@ -94,7 +93,7 @@ class UserControllerTest {
                 .andExpectAll(isApiError("Email or password is invalid", "BAD_REQUEST"));
     }
 
-    @DisplayName("Registration new user with new email")
+    @DisplayName("Return new user info, and save in db, when email not exist")
     @Test
     public void registrationWithNewEmail() throws Exception {
         UserRegistrationRequest request = new UserRegistrationRequest();
@@ -105,12 +104,12 @@ class UserControllerTest {
         this.mockMvc
                 .perform(postJson("/api/v1/user/registration", request))
                 .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.email", is(request.getEmail())))
-                .andExpect(jsonPath("$.name", is(request.getName())))
-                .andExpect(jsonPath("$.picture", is("")))
-                .andExpect(jsonPath("$.password").doesNotExist());
+                .andExpectAll(status().isCreated(),
+                              content().contentType(MediaType.APPLICATION_JSON),
+                              jsonPath("$.email", is(request.getEmail())),
+                              jsonPath("$.name", is(request.getName())),
+                              jsonPath("$.picture", is("")),
+                              jsonPath("$.password").doesNotExist());
 
         User savedUser = this.userRepo
                 .findByEmail(newUser.getEmail())
@@ -124,7 +123,7 @@ class UserControllerTest {
         Assertions.assertTrue(passwordEncoder.matches(newUser.getPassword(), savedUser.getPassword()));
     }
 
-    @DisplayName("Registration new user with already existed email")
+    @DisplayName("Return api error, and not sava in db, when email exist")
     @Test
     public void registrationWithAlreadyExistedEmail() throws Exception {
         UserRegistrationRequest request = new UserRegistrationRequest();
@@ -137,26 +136,71 @@ class UserControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpectAll(isApiError("Email already exist", "BAD_REQUEST"));
+
+        User savedUser = this.userRepo
+                .findByEmail(request.getEmail())
+                .orElse(null);
+
+        Assertions.assertNotNull(savedUser);
+        Assertions.assertNotEquals(savedUser.getName(), request.getName());
     }
 
+    @DisplayName("Return user info without password when user authenticated")
     @WithMockAppUser
     @Test
-    public void info() throws Exception {
+    public void infoReturnInfoWhenAuthenticated() throws Exception {
         User correctUser = testUserFactory.getCorrectUser();
 
         this.mockMvc
                 .perform(get("/api/v1/user"))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.email", is(correctUser.getEmail())))
-                .andExpect(jsonPath("$.name", is(correctUser.getName())))
-                .andExpect(jsonPath("$.picture", is(correctUser.getPicture())))
-                .andExpect(jsonPath("$.password").doesNotExist());
+                .andExpectAll(status().isOk(),
+                              content().contentType("application/json"),
+                              jsonPath("$.email", is(correctUser.getEmail())),
+                              jsonPath("$.name", is(correctUser.getName())),
+                              jsonPath("$.picture", is(correctUser.getPicture())),
+                              jsonPath("$.password").doesNotExist());
     }
 
+    @DisplayName("Return api error when user not authenticated")
     @Test
-    public void delete() {
+    public void infoReturnApiErrorWhenNotAuthenticated() throws Exception {
+        this.mockMvc
+                .perform(get("/api/v1/user"))
+                .andDo(print())
+                .andExpect(status().isForbidden())
+                .andExpectAll(isApiError("Access denied", "FORBIDDEN"));
+    }
+
+    @DisplayName("Auto logout and delete user from db")
+    @WithMockAppUser
+    @Test
+    public void deleteUserWhenAuthenticated() throws Exception {
+        this.mockMvc
+                .perform(delete("/api/v1/user").with(csrf()))
+                .andDo(print())
+                .andExpectAll(status().isOk());
+
+        this.mockMvc
+                .perform(get("/api/v1/user").with(csrf()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+
+        User correctUser = testUserFactory.getCorrectUser();
+        User byEmail = userRepo
+                .findByEmail(correctUser.getEmail())
+                .orElse(null);
+        Assertions.assertNull(byEmail);
+    }
+
+    @DisplayName("Return api error when not authenticated")
+    @Test
+    public void deleteReturnApiErrorWhenNotAuthenticated() throws Exception {
+        this.mockMvc
+                .perform(delete("/api/v1/user").with(csrf()))
+                .andDo(print())
+                .andExpect(status().isForbidden())
+                .andExpectAll(isApiError("Access denied", "FORBIDDEN"));
     }
 
     @Test

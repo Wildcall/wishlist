@@ -11,4 +11,6 @@ public interface UserService extends UserDetailsService {
     Optional<User> findByEmail(String email);
 
     boolean existByEmail(String email);
+
+    boolean delete(User user);
 }

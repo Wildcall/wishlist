@@ -32,7 +32,11 @@ public class UserFacadeImpl implements UserFacade {
     @Override
     public String delete() {
         String email = userExtractor.extractEmail();
-        return null;
+        User user = userService
+                .findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("Email not found"));
+        userService.delete(user);
+        return email;
     }
 
     @Override

@@ -5,13 +5,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.Hibernate;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.UserDto;
 
 import javax.persistence.*;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -19,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "_user")
-public class User implements BaseEntity {
+public class User implements BaseEntity, UserDetails {
 
     @Id
     private String email;
@@ -50,6 +50,44 @@ public class User implements BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "gift_id")
     )
     private Set<Gift> givingGiftsSet;
+    
+    @Override
+    public BaseDto toBaseDto() {
+        return new UserDto(this.email,
+                           this.password,
+                           this.name,
+                           this.picture);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.enable;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -62,13 +100,5 @@ public class User implements BaseEntity {
     @Override
     public int hashCode() {
         return getClass().hashCode();
-    }
-
-    @Override
-    public BaseDto toBaseDto() {
-        return new UserDto(this.email,
-                           this.password,
-                           this.name,
-                           this.picture);
     }
 }

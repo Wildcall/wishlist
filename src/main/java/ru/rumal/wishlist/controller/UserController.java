@@ -13,6 +13,9 @@ import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.UserDto;
 import ru.rumal.wishlist.model.dto.View;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
@@ -42,9 +45,9 @@ public class UserController {
     }
 
     @DeleteMapping
-    public ResponseEntity<String> delete() {
+    public ResponseEntity<String> delete(HttpServletRequest request) throws ServletException {
         String response = userFacade.delete();
-
+        request.logout();
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(response);

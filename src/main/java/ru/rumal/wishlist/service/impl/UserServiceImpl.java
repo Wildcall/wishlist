@@ -2,6 +2,8 @@ package ru.rumal.wishlist.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.UserRepo;
@@ -18,8 +20,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> save(User user) {
-        if (existByEmail(user.getEmail()))
-            return Optional.empty();
+        if (existByEmail(user.getEmail())) return Optional.empty();
         return Optional.of(userRepo.save(user));
     }
 
@@ -33,5 +34,19 @@ public class UserServiceImpl implements UserService {
         return userRepo
                 .findByEmail(email)
                 .isPresent();
+    }
+
+    @Override
+    public boolean delete(User user) {
+        userRepo.delete(user);
+        return true;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
+        return userRepo
+                .findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
     }
 }

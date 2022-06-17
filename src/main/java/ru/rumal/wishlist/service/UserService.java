@@ -13,4 +13,6 @@ public interface UserService extends UserDetailsService {
     boolean existByEmail(String email);
 
     boolean delete(User user);
+
+    String generateRandomId(User user);
 }

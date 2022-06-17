@@ -4,14 +4,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
-import org.springframework.context.annotation.Import;
+import ru.rumal.wishlist.model.AuthType;
+import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.dto.UserDto;
 import ru.rumal.wishlist.model.dto.View;
 
@@ -25,16 +28,12 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Import(Utils.class)
 @JsonTest
 class UserDtoTest {
 
     private final Validator validator = Validation
             .buildDefaultValidatorFactory()
             .getValidator();
-
-    @Autowired
-    private Utils utils;
 
     @Autowired
     private JacksonTester<UserDto> jacksonTester;
@@ -50,10 +49,207 @@ class UserDtoTest {
         return requestView;
     }
 
+    public static Map<String, Object> getCorrectUpdateViewMap() {
+        Map<String, Object> requestView = new HashMap<>();
+        requestView.put("id", "application-1234567891234567891212");
+        requestView.put("email", "email@email.com");
+        requestView.put("name", "name");
+        return requestView;
+    }
+
+    public static Map<String, Object> getCorrectUpdatePasswordViewMap() {
+        Map<String, Object> requestView = new HashMap<>();
+        requestView.put("id", "application-1234567891234567891212");
+        requestView.put("password", "password");
+        requestView.put("newPassword", "newPassword");
+        return requestView;
+    }
+
     @SneakyThrows
+    public static Stream<Arguments> new_view_invalid_json_stream() {
+        ObjectMapper mapper = new ObjectMapper();
+        Stream.Builder<Arguments> sb = Stream.builder();
+
+        Map<String, Object> map = getCorrectNewViewMap();
+        String valid = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(valid, null, true));
+
+        map = getCorrectNewViewMap();
+        map.put("email", "wrongEmail");
+        String invalidEmail = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(invalidEmail, "emails", false));
+
+        map = getCorrectNewViewMap();
+        map.put("password", "short");
+        String shortPassword = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(shortPassword, "password", false));
+
+        map = getCorrectNewViewMap();
+        map.put("password", "too_1234567891234567891234_long");
+        String longPassword = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(longPassword, "password", false));
+
+        map = getCorrectNewViewMap();
+        map.put("name", "s");
+        String shortName = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(shortName, "name", false));
+
+        map = getCorrectNewViewMap();
+        map.put("name", "too_1234567891234567891234_long");
+        String longName = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(longName, "name", false));
+
+        map = getCorrectNewViewMap();
+        map.put("name", "&MyName");
+        String wrongName = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(wrongName, "name", false));
+
+        //  @formatter:off
+        Stream.of("email", "password", "name")
+                .forEach(field -> Stream.of("", "  ", null)
+                        .forEach(value -> {
+                            try {
+                                Map<String, Object> correctNewViewMap = getCorrectNewViewMap();
+                                correctNewViewMap.put(field, value);
+                                String json = mapper.writeValueAsString(correctNewViewMap);
+                                sb.add(Arguments.of(json, field, false));
+                            } catch (JsonProcessingException ignored) {}
+                        }));
+
+        Stream.of("email", "password", "name")
+                .forEach(field -> {
+                    try {
+                        Map<String, Object> correctNewViewMap = getCorrectNewViewMap();
+                        correctNewViewMap.remove(field);
+                        String json = mapper.writeValueAsString(correctNewViewMap);
+                        sb.add(Arguments.of(json, field, false));
+                    } catch (JsonProcessingException ignored) {}
+                });
+        //  @formatter:on
+        return sb.build();
+    }
+
+    @SneakyThrows
+    public static Stream<Arguments> update_view_invalid_json_stream() {
+        ObjectMapper mapper = new ObjectMapper();
+        Stream.Builder<Arguments> sb = Stream.builder();
+
+        Map<String, Object> map = getCorrectUpdateViewMap();
+        String valid = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(valid, null, true));
+
+        map = getCorrectUpdateViewMap();
+        map.put("email", "wrongEmail");
+        String invalidEmail = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(invalidEmail, "email", false));
+
+        map = getCorrectUpdateViewMap();
+        map.put("name", "s");
+        String shortName = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(shortName, "name", false));
+
+        map = getCorrectUpdateViewMap();
+        map.put("name", "too_1234567891234567891234_long");
+        String longName = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(longName, "name", false));
+
+        map = getCorrectUpdateViewMap();
+        map.put("name", "&MyName");
+        String wrongName = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(wrongName, "name", false));
+
+        //  @formatter:off
+        Stream.of("id", "email", "name")
+                .forEach(field -> Stream.of("", "  ", null)
+                        .forEach(value -> {
+                            try {
+                                Map<String, Object> correctNewViewMap = getCorrectUpdateViewMap();
+                                correctNewViewMap.put(field, value);
+                                String json = mapper.writeValueAsString(correctNewViewMap);
+                                sb.add(Arguments.of(json, field, false));
+                            } catch (JsonProcessingException ignored) {}
+                        }));
+
+        Stream.of("id", "email", "name")
+                .forEach(field -> {
+                    try {
+                        Map<String, Object> correctNewViewMap = getCorrectUpdateViewMap();
+                        correctNewViewMap.remove(field);
+                        String json = mapper.writeValueAsString(correctNewViewMap);
+                        sb.add(Arguments.of(json, field, false));
+                    } catch (JsonProcessingException ignored) {}
+                });
+        //  @formatter:on
+        return sb.build();
+    }
+
+    @SneakyThrows
+    public static Stream<Arguments> update_password_view_invalid_json_stream() {
+        ObjectMapper mapper = new ObjectMapper();
+        Stream.Builder<Arguments> sb = Stream.builder();
+
+        Map<String, Object> map = getCorrectUpdatePasswordViewMap();
+        String valid = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(valid, null, true));
+
+        map = getCorrectUpdatePasswordViewMap();
+        map.put("password", "s");
+        String shortPassword = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(shortPassword, "password", false));
+
+        map = getCorrectUpdatePasswordViewMap();
+        map.put("password", "too_1234567891234567891234_long");
+        String longPassword = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(longPassword, "password", false));
+
+        map = getCorrectUpdatePasswordViewMap();
+        map.put("newPassword", "s");
+        String shortNewPassword = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(shortNewPassword, "newPassword", false));
+
+        map = getCorrectUpdatePasswordViewMap();
+        map.put("newPassword", "too_1234567891234567891234_long");
+        String longNewPassword = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(longNewPassword, "newPassword", false));
+
+        //  @formatter:off
+        Stream.of("id", "password", "newPassword")
+                .forEach(field -> Stream.of("", "  ", null)
+                        .forEach(value -> {
+                            try {
+                                Map<String, Object> correctNewViewMap = getCorrectUpdatePasswordViewMap();
+                                correctNewViewMap.put(field, value);
+                                String json = mapper.writeValueAsString(correctNewViewMap);
+                                sb.add(Arguments.of(json, field, false));
+                            } catch (JsonProcessingException ignored) {}
+                        }));
+
+        Stream.of("id", "password", "newPassword")
+                .forEach(field -> {
+                    try {
+                        Map<String, Object> correctNewViewMap = getCorrectUpdatePasswordViewMap();
+                        correctNewViewMap.remove(field);
+                        String json = mapper.writeValueAsString(correctNewViewMap);
+                        sb.add(Arguments.of(json, field, false));
+                    } catch (JsonProcessingException ignored) {}
+                });
+        //  @formatter:on
+        return sb.build();
+    }
+
+    @SneakyThrows
+    @DisplayName("Pass if returned json not contains private data")
     @Test
     public void responseView() {
-        UserDto userDto = utils.getUserDto();
+        UserDto userDto = new UserDto("id",
+                                      "email",
+                                      "password",
+                                      "new password",
+                                      "name",
+                                      "picture",
+                                      AuthType.APPLICATION,
+                                      true,
+                                      Role.USER);
 
         JsonContent<UserDto> result = this.jacksonTester
                 .forView(View.Response.class)
@@ -80,87 +276,74 @@ class UserDtoTest {
     }
 
     @SneakyThrows
-    @Test
-    public void NewView_ValidJson() {
-        String jsonRequest = mapper.writeValueAsString(getCorrectNewViewMap());
-
+    @ParameterizedTest
+    @MethodSource("new_view_invalid_json_stream")
+    public void newView(String jsonRequest,
+                        String propertyPath,
+                        boolean expected) {
         UserDto result = this.jacksonTester
                 .parse(jsonRequest)
                 .getObject();
 
         Set<ConstraintViolation<UserDto>> violations = validator.validate(result, View.New.class);
-        Assertions.assertTrue(violations.isEmpty());
+        Assertions.assertEquals(violations.isEmpty(), expected);
+        if (!expected) {
+            long count = violations
+                    .stream()
+                    .filter(v -> !v
+                            .getPropertyPath()
+                            .toString()
+                            .equals(propertyPath))
+                    .count();
+            Assertions.assertEquals(count, 0, "Wrong field throw exception");
+        }
     }
 
     @SneakyThrows
     @ParameterizedTest
-    @MethodSource("new_view_invalid_json_stream")
-    public void NewView_InvalidJson(String jsonRequest) {
+    @MethodSource("update_view_invalid_json_stream")
+    public void updateView(String jsonRequest,
+                           String propertyPath,
+                           boolean expected) {
         UserDto result = this.jacksonTester
                 .parse(jsonRequest)
                 .getObject();
 
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(result, View.New.class);
-        Assertions.assertFalse(violations.isEmpty());
+        Set<ConstraintViolation<UserDto>> violations = validator.validate(result, View.Update.class);
+        Assertions.assertEquals(violations.isEmpty(), expected);
+        if (!expected) {
+            long count = violations
+                    .stream()
+                    .filter(v -> !v
+                            .getPropertyPath()
+                            .toString()
+                            .equals(propertyPath))
+                    .count();
+            Assertions.assertEquals(count, 0, "Wrong field throw exception");
+        }
     }
 
     @SneakyThrows
-    public static Stream<String> new_view_invalid_json_stream() {
-        ObjectMapper mapper = new ObjectMapper();
-        Stream.Builder<String> sb = Stream.builder();
+    @ParameterizedTest
+    @MethodSource("update_password_view_invalid_json_stream")
+    public void updatePasswordView(String jsonRequest,
+                                   String propertyPath,
+                                   boolean expected) {
+        UserDto result = this.jacksonTester
+                .parse(jsonRequest)
+                .getObject();
 
-        Map<String, Object> map = getCorrectNewViewMap();
-        map.put("email", "wrongEmail");
-        String invalidEmail = mapper.writeValueAsString(map);
-        sb.add(invalidEmail);
-
-        map = getCorrectNewViewMap();
-        map.put("password", "short");
-        String shortPassword = mapper.writeValueAsString(map);
-        sb.add(shortPassword);
-
-        map = getCorrectNewViewMap();
-        map.put("password", "too_1234567891234567891234_long");
-        String longPassword = mapper.writeValueAsString(map);
-        sb.add(longPassword);
-
-        map = getCorrectNewViewMap();
-        map.put("name", "s");
-        String shortName = mapper.writeValueAsString(map);
-        sb.add(shortName);
-
-        map = getCorrectNewViewMap();
-        map.put("name", "too_1234567891234567891234_long");
-        String longName = mapper.writeValueAsString(map);
-        sb.add(longName);
-
-        map = getCorrectNewViewMap();
-        map.put("name", "&MyName");
-        String wrongName = mapper.writeValueAsString(map);
-        sb.add(wrongName);
-
-        //  @formatter:off
-        Stream.of("email", "password", "name")
-                .forEach(field -> Stream.of("", "  ", null)
-                        .forEach(value -> {
-                            try {
-                                Map<String, Object> correctNewViewMap = getCorrectNewViewMap();
-                                correctNewViewMap.put(field, value);
-                                String json = mapper.writeValueAsString(correctNewViewMap);
-                                sb.add(json);
-                            } catch (JsonProcessingException ignored) {}
-                        }));
-
-        Stream.of("email", "password", "name")
-                .forEach(field -> {
-                    try {
-                        Map<String, Object> correctNewViewMap = getCorrectNewViewMap();
-                        correctNewViewMap.remove(field);
-                        String json = mapper.writeValueAsString(correctNewViewMap);
-                        sb.add(json);
-                    } catch (JsonProcessingException ignored) {}
-                });
-        //  @formatter:on
-        return sb.build();
+        Set<ConstraintViolation<UserDto>> violations = validator.validate(result, View.UpdatePassword.class);
+        Assertions.assertEquals(violations.isEmpty(), expected);
+        if (!expected) {
+            long count = violations
+                    .stream()
+                    .filter(v -> !v
+                            .getPropertyPath()
+                            .toString()
+                            .equals(propertyPath))
+                    .count();
+            Assertions.assertEquals(count, 0, "Wrong field throw exception");
+        }
     }
 }

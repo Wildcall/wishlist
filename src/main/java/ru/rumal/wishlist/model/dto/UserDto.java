@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.entity.BaseEntity;
 import ru.rumal.wishlist.model.entity.User;
 
@@ -16,6 +17,13 @@ import javax.validation.constraints.*;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDto implements BaseDto {
+
+    @Null(groups = {View.New.class})
+    @NotNull(groups = {View.Update.class})
+    @NotBlank(groups = {View.Update.class})
+    @NotEmpty(groups = {View.Update.class})
+    @JsonView(View.Response.class)
+    private String id;
 
     @NotNull(groups = {View.New.class, View.Update.class})
     @NotBlank(groups = {View.New.class, View.Update.class})
@@ -39,17 +47,31 @@ public class UserDto implements BaseDto {
     @JsonView(View.Response.class)
     private String name;
 
-    @Null(groups = {View.New.class, View.Update.class})
+    @Null(groups = {View.New.class})
+    @NotNull(groups = {View.Update.class})
+    @NotBlank(groups = {View.Update.class})
+    @NotEmpty(groups = {View.Update.class})
     @JsonView(View.Response.class)
     private String picture;
+
+    @Null(groups = {View.New.class, View.Update.class})
+    @JsonView(View.Response.class)
+    private AuthType authType;
+
+    @Null(groups = {View.New.class, View.Update.class})
+    @JsonView(View.Private.class)
+    private Boolean enable;
 
     @Override
     public BaseEntity toBaseEntity() {
         User user = new User();
+        user.setId(id);
         user.setEmail(email);
         user.setPassword(password);
         user.setName(name);
         user.setPicture(picture);
-        return null;
+        user.setAuthType(authType);
+        user.setEnable(enable);
+        return user;
     }
 }

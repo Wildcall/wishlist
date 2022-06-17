@@ -40,6 +40,11 @@ public class Gift implements BaseEntity {
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "gifts")
     private Set<Event> eventsSet;
 
+    @ToString.Exclude
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "tag_id", referencedColumnName = "id")
+    private Tag tag;
+
     @Override
     public BaseDto toBaseDto() {
         GiftDto gift = new GiftDto();

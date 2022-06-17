@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.model.AuthType;
+import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.UserRepo;
 import ru.rumal.wishlist.service.AvatarService;
@@ -29,6 +30,7 @@ public class UserServiceImpl implements UserService {
         if (existByEmail(user.getEmail()))
             return Optional.empty();
         user.setId(generateRandomId(user));
+        user.setRole(Role.USER);
         if (user.getPicture() == null)
             user.setPicture(avatarService.generate(user));
         return Optional.of(userRepo.save(user));
@@ -60,7 +62,9 @@ public class UserServiceImpl implements UserService {
 
         StringBuilder str = new StringBuilder();
         str
-                .append(authType.name().toLowerCase(Locale.ROOT))
+                .append(authType
+                                .name()
+                                .toLowerCase(Locale.ROOT))
                 .append("-");
         for (int i = 0; i < 21; i++) {
             str.append(random.nextInt(10));

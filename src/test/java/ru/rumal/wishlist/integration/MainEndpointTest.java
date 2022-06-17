@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.integration.controller;
+package ru.rumal.wishlist.integration;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +20,7 @@ import static ru.rumal.wishlist.integration.utils.HttpResponseApiError.isApiErro
 @AutoConfigureMockMvc
 @RequiredArgsConstructor
 @TestPropertySource(locations = "classpath:application-test.properties")
-class MainControllerTest {
+class MainEndpointTest {
 
     @Autowired
     private MockMvc mockMvc;

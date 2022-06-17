@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.rumal.wishlist.model.AuthType;
+import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.UserDto;
 
@@ -17,6 +18,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -35,15 +37,8 @@ public class User implements BaseEntity, UserDetails {
     @Enumerated(EnumType.STRING)
     private AuthType authType;
     private Boolean enable;
-
-    @ToString.Exclude
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "_user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @ToString.Exclude
     @OneToMany(mappedBy = "user",
@@ -80,17 +75,19 @@ public class User implements BaseEntity, UserDetails {
         return new UserDto(this.id,
                            this.email,
                            this.password,
+                           null,
                            this.name,
                            this.picture,
                            this.authType,
-                           this.enable);
+                           this.enable,
+                           this.role);
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles
-                .stream()
-                .map(r -> new SimpleGrantedAuthority(r.getName()))
+        return Stream
+                .of(role.name())
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
 

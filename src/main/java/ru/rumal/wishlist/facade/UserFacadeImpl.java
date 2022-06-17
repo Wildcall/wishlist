@@ -24,6 +24,7 @@ public class UserFacadeImpl implements UserFacade {
     @Override
     public BaseDto getInfo() {
         String email = userExtractor.extractEmail();
+
         return userService
                 .findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("Email not found"))
@@ -52,7 +53,6 @@ public class UserFacadeImpl implements UserFacade {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setEnable(true);
         user.setAuthType(AuthType.APPLICATION);
-        user.setPicture("");
         return userService
                 .save(user)
                 .orElseThrow(() -> new BadRequestException("Email already exist"))

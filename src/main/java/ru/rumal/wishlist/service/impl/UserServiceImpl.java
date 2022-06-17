@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.UserRepo;
+import ru.rumal.wishlist.service.AvatarService;
 import ru.rumal.wishlist.service.UserService;
 
 import java.util.Locale;
@@ -21,12 +22,15 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
     private final Random random = new Random();
+    private final AvatarService avatarService;
 
     @Override
     public Optional<User> save(User user) {
         if (existByEmail(user.getEmail()))
             return Optional.empty();
-        user.setId(idGenerator(user.getAuthType()));
+        user.setId(generateRandomId(user));
+        if (user.getPicture() == null)
+            user.setPicture(avatarService.generate(user));
         return Optional.of(userRepo.save(user));
     }
 
@@ -50,7 +54,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String generateRandomId(User user) {
-        return null;
+        AuthType authType = user.getAuthType();
+        if (authType == null)
+            authType = AuthType.APPLICATION;
+
+        StringBuilder str = new StringBuilder();
+        str
+                .append(authType.name().toLowerCase(Locale.ROOT))
+                .append("-");
+        for (int i = 0; i < 21; i++) {
+            str.append(random.nextInt(10));
+        }
+        return str.toString();
     }
 
     @Override
@@ -59,21 +74,5 @@ public class UserServiceImpl implements UserService {
         return userRepo
                 .findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Email not found"));
-    }
-
-    public String idGenerator(AuthType authType) {
-        if (authType == null)
-            authType = AuthType.APPLICATION;
-
-        StringBuilder str = new StringBuilder();
-        str
-                .append(authType
-                                .name()
-                                .toLowerCase(Locale.ROOT))
-                .append("-");
-        for (int i = 0; i < 21; i++) {
-            str.append(random.nextInt(10));
-        }
-        return str.toString();
     }
 }

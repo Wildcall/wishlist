@@ -144,103 +144,94 @@
         </addColumn>
     </changeSet>
 
-<!--    <changeSet id="add_tag_and_user_id_auth_type" author="Nikolay Malygin">-->
-<!--        <createTable tableName="_basic_tag">-->
-<!--            <column name="id" type="bigint" autoIncrement="true">-->
-<!--                <constraints nullable="false" primaryKey="true"/>-->
-<!--            </column>-->
-<!--            <column name="name" type="varchar(255)">-->
-<!--                <constraints nullable="false" unique="true"/>-->
-<!--            </column>-->
-<!--        </createTable>-->
+    <changeSet id="add_tag_and_user_id_auth_type" author="Nikolay Malygin">
+        <dropForeignKeyConstraint baseTableName="_event" constraintName="_event_user_email_user_email"/>
+        <dropForeignKeyConstraint baseTableName="_gift" constraintName="_gift_user_email_user_email"/>
+        <dropForeignKeyConstraint baseTableName="_user_giving_gift"
+                                  constraintName="_user_giving_gift_user_email_user_email"/>
 
-<!--        <createTable tableName="_role">-->
-<!--            <column name="id" type="bigint" autoIncrement="true">-->
-<!--                <constraints nullable="false" primaryKey="true"/>-->
-<!--            </column>-->
-<!--            <column name="name" type="varchar(64)">-->
-<!--                <constraints nullable="false" unique="true"/>-->
-<!--            </column>-->
-<!--        </createTable>-->
-<!--        <dropForeignKeyConstraint baseTableName="_event" constraintName="_event_user_email_user_email"/>-->
-<!--        <dropForeignKeyConstraint baseTableName="_gift" constraintName="_gift_user_email_user_email"/>-->
-<!--        <dropForeignKeyConstraint baseTableName="_user_giving_gift"-->
-<!--                                  constraintName="_user_giving_gift_user_email_user_email"/>-->
-<!--        <dropPrimaryKey tableName="_user"/>-->
-<!--        <addColumn tableName="_user">-->
-<!--            <column name="id" type="varchar(255)">-->
-<!--                <constraints nullable="false" primaryKey="true"/>-->
-<!--            </column>-->
-<!--            <column name="auth_type" type="varchar(64)">-->
-<!--                <constraints nullable="false"/>-->
-<!--            </column>-->
-<!--        </addColumn>-->
-<!--        <createTable tableName="_user_role">-->
-<!--            <column name="user_id" type="varchar(255)">-->
-<!--                <constraints nullable="false" primaryKey="true"/>-->
-<!--            </column>-->
-<!--            <column name="role_id" type="bigint">-->
-<!--                <constraints nullable="false" primaryKey="true"/>-->
-<!--            </column>-->
-<!--        </createTable>-->
-<!--        <addForeignKeyConstraint baseTableName="_user_role" baseColumnNames="user_id"-->
-<!--                                 constraintName="_user_role_user_id_user-id"-->
-<!--                                 referencedTableName="_user"-->
-<!--                                 referencedColumnNames="id"/>-->
-<!--        <addForeignKeyConstraint baseTableName="_user_role" baseColumnNames="role_id"-->
-<!--                                 constraintName="_user_role_role_id_role_id"-->
-<!--                                 referencedTableName="_role"-->
-<!--                                 referencedColumnNames="id"/>-->
-<!--        <dropColumn tableName="_event" columnName="user_email"/>-->
-<!--        <addColumn tableName="_event">-->
-<!--            <column name="user_id" type="varchar(255)">-->
-<!--                <constraints nullable="false"/>-->
-<!--            </column>-->
-<!--        </addColumn>-->
-<!--        <addForeignKeyConstraint baseTableName="_event" baseColumnNames="user_id" constraintName="_event_user_id_user_id"-->
-<!--                                 referencedTableName="_user"-->
-<!--                                 referencedColumnNames="id"/>-->
-<!--        <dropColumn tableName="_gift" columnName="user_email"/>-->
-<!--        <addColumn tableName="_gift">-->
-<!--            <column name="user_id" type="varchar(255)">-->
-<!--                <constraints nullable="false"/>-->
-<!--            </column>-->
-<!--        </addColumn>-->
-<!--        <addForeignKeyConstraint baseTableName="_gift" baseColumnNames="user_id" constraintName="_gift_user_id_user_id"-->
-<!--                                 referencedTableName="_user"-->
-<!--                                 referencedColumnNames="id"/>-->
-<!--        <dropColumn tableName="_user_giving_gift" columnName="user_email"/>-->
-<!--        <addColumn tableName="_user_giving_gift">-->
-<!--            <column name="user_id" type="varchar(255)">-->
-<!--                <constraints nullable="false" primaryKey="true"/>-->
-<!--            </column>-->
-<!--        </addColumn>-->
-<!--        <addForeignKeyConstraint baseTableName="_user_giving_gift" baseColumnNames="user_id"-->
-<!--                                 constraintName="_user_giving_gift_user_id_user_id"-->
-<!--                                 referencedTableName="_user"-->
-<!--                                 referencedColumnNames="id"/>-->
+        <createTable tableName="_basic_tag">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
 
-<!--        <createTable tableName="_tag">-->
-<!--            <column name="id" type="bigint" autoIncrement="true">-->
-<!--                <constraints nullable="false" primaryKey="true"/>-->
-<!--            </column>-->
-<!--            <column name="name" type="varchar(64)">-->
-<!--                <constraints nullable="false"/>-->
-<!--            </column>-->
-<!--            <column name="user_id" type="varchar(255)">-->
-<!--                <constraints nullable="false"/>-->
-<!--            </column>-->
-<!--        </createTable>-->
-<!--        <addColumn tableName="_gift">-->
-<!--            <column name="tag_id" type="bigint">-->
-<!--                <constraints nullable="true"/>-->
-<!--            </column>-->
-<!--        </addColumn>-->
-<!--        <addForeignKeyConstraint baseTableName="_gift" baseColumnNames="tag_id" constraintName="_gift_tag_id_tag_id"-->
-<!--                                 referencedTableName="_tag"-->
-<!--                                 referencedColumnNames="id"/>-->
-<!--        <addForeignKeyConstraint baseTableName="_tag" baseColumnNames="user_id" constraintName="_tag_user_id_user_id"-->
-<!--                                 referencedTableName="_user"-->
-<!--                                 referencedColumnNames="id"/>-->
-<!--    </changeSet>-->
+        <createTable tableName="_role">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+        <renameColumn tableName="_user" oldColumnName="email" newColumnName="id"/>
+        <addColumn tableName="_user">
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="auth_type" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <createTable tableName="_user_role">
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="role_id" type="bigint">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="_user_role" baseColumnNames="user_id"
+                                 constraintName="_user_role_user_id_user-id"
+                                 referencedTableName="_user"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="_user_role" baseColumnNames="role_id"
+                                 constraintName="_user_role_role_id_role_id"
+                                 referencedTableName="_role"
+                                 referencedColumnNames="id"/>
+
+        <renameColumn tableName="_event" oldColumnName="user_email" newColumnName="user_id"/>
+        <addForeignKeyConstraint baseTableName="_event" baseColumnNames="user_id"
+                                 constraintName="_event_user_id_user_id"
+                                 referencedTableName="_user"
+                                 referencedColumnNames="id"/>
+
+        <renameColumn tableName="_gift" oldColumnName="user_email" newColumnName="user_id"/>
+        <addForeignKeyConstraint baseTableName="_gift" baseColumnNames="user_id" constraintName="_gift_user_id_user_id"
+                                 referencedTableName="_user"
+                                 referencedColumnNames="id"/>
+
+        <renameColumn tableName="_user_giving_gift" oldColumnName="user_email" newColumnName="user_id"/>
+        <addForeignKeyConstraint baseTableName="_user_giving_gift" baseColumnNames="user_id"
+                                 constraintName="_user_giving_gift_user_id_user_id"
+                                 referencedTableName="_user"
+                                 referencedColumnNames="id"/>
+
+        <createTable tableName="_tag">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addColumn tableName="_gift">
+            <column name="tag_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="_gift" baseColumnNames="tag_id" constraintName="_gift_tag_id_tag_id"
+                                 referencedTableName="_tag"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="_tag" baseColumnNames="user_id" constraintName="_tag_user_id_user_id"
+                                 referencedTableName="_user"
+                                 referencedColumnNames="id"/>
+    </changeSet>
 </databaseChangeLog>

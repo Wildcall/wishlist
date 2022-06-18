@@ -18,6 +18,8 @@ import java.util.Random;
 public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
+    private final Random random = new Random();
+
 
     @Override
     public Optional<User> save(User user) {
@@ -45,7 +47,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String generateRandomId(User user) {
-        Random random = new Random();
         long value = 1000000L + Math.abs(random.nextLong());
         return String.valueOf(value);
     }

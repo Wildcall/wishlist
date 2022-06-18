@@ -45,10 +45,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String generateRandomId(User user) {
-        long leftLimit = 1000000L;
-        long rightLimit = Long.MAX_VALUE;
-        long generatedLong = leftLimit + (long) (Math.random() * (rightLimit - leftLimit));
-        return String.valueOf(generatedLong);
+        Random random = new Random();
+        long value = 1000000L + Math.abs(random.nextLong());
+        return String.valueOf(value);
     }
 
     @Override

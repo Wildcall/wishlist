@@ -1,5 +1,6 @@
 package ru.rumal.wishlist.unit.impl.service;
 
+import liquibase.repackaged.org.apache.commons.lang3.math.NumberUtils;
 import org.junit.jupiter.api.Test;
 import ru.rumal.wishlist.service.UserService;
 import ru.rumal.wishlist.service.impl.UserServiceImpl;
@@ -14,13 +15,13 @@ class UserServiceImplTest {
     void generateRandomId() {
         UserService impl = new UserServiceImpl(null);
         HashSet<String> set = new HashSet<>();
-        for (int i = 0; i < 500; i++) {
+        for (int i = 0; i < 100; i++) {
             String buffer = impl.generateRandomId(null);
             assertNotEquals(null, buffer);
-            assertTrue(buffer.length() > 7);
+            assertFalse(buffer.startsWith("-"));
+            assertTrue(NumberUtils.isDigits(buffer));
             assertFalse(set.contains(buffer));
             set.add(buffer);
         }
     }
-
 }

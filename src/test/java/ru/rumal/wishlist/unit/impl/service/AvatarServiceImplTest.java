@@ -23,5 +23,6 @@ class AvatarServiceImplTest {
             set.add(buffer);
         }
     }
+
 }
 

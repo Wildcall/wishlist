@@ -13,15 +13,25 @@ import java.util.Random;
 
 public class AvatarServiceImpl implements AvatarService {
     public final String BASE64_PREFIX = "data:image/png;base64,";
-    public final int width = 20;
-    public final int grid = 5;
+
+    public void setWidth(int width) {
+        if (width < 1) throw new IllegalArgumentException("Width must be greater than 1");
+        this.width = width;
+    }
+
+    public void setGrid(int grid) {
+        if (grid < 1) throw new IllegalArgumentException("Grid must be greater than 1");
+        this.grid = grid;
+    }
+    public int width = 20;
+    public int grid = 5;
 
     @Override
     public String generate(User user) {
         return BASE64_PREFIX + new String(Base64.getEncoder().encode(create()));
     }
 
-    public byte[] create() {
+    private byte[] create() {
         int padding = width / 2;
         int size = width * grid + width;
         BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);

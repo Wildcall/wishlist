@@ -47,13 +47,13 @@ public class Gift implements BaseEntity {
 
     @Override
     public BaseDto toBaseDto() {
-        GiftDto gift = new GiftDto();
-        gift.setId(this.id);
-        gift.setName(this.name);
-        gift.setLink(this.link);
-        gift.setPicture(this.picture);
-        gift.setDescription(this.description);
-        gift.setStatus(this.status);
-        return gift;
+        return new GiftDto(
+                this.id,
+                this.name,
+                this.link,
+                this.picture,
+                this.description,
+                this.status,
+                this.tag.getId());
     }
 }

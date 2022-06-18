@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
+import org.springframework.util.Assert;
 import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.dto.UserDto;
@@ -41,7 +42,18 @@ class UserDtoTest {
     @Autowired
     private ObjectMapper mapper;
 
-    public static Map<String, Object> getCorrectNewViewMap() {
+    private static Map<String, Object> getCorrectResponseViewMap(UserDto userDto) {
+        Map<String, Object> responseView = new HashMap<>();
+        responseView.put("id", userDto.getId());
+        responseView.put("email", userDto.getEmail());
+        responseView.put("name", userDto.getName());
+        responseView.put("picture", userDto.getPicture());
+        responseView.put("authType", userDto.getAuthType().name());
+        responseView.put("role", userDto.getRole().name());
+        return responseView;
+    }
+
+    private static Map<String, Object> getCorrectNewViewMap() {
         Map<String, Object> requestView = new HashMap<>();
         requestView.put("email", "email@email.com");
         requestView.put("password", "password");
@@ -49,7 +61,7 @@ class UserDtoTest {
         return requestView;
     }
 
-    public static Map<String, Object> getCorrectUpdateViewMap() {
+    private static Map<String, Object> getCorrectUpdateViewMap() {
         Map<String, Object> requestView = new HashMap<>();
         requestView.put("id", "application-1234567891234567891212");
         requestView.put("email", "email@email.com");
@@ -57,7 +69,7 @@ class UserDtoTest {
         return requestView;
     }
 
-    public static Map<String, Object> getCorrectUpdatePasswordViewMap() {
+    private static Map<String, Object> getCorrectUpdatePasswordViewMap() {
         Map<String, Object> requestView = new HashMap<>();
         requestView.put("id", "application-1234567891234567891212");
         requestView.put("password", "password");
@@ -66,7 +78,7 @@ class UserDtoTest {
     }
 
     @SneakyThrows
-    public static Stream<Arguments> new_view_invalid_json_stream() {
+    private static Stream<Arguments> new_view_invalid_json_stream() {
         ObjectMapper mapper = new ObjectMapper();
         Stream.Builder<Arguments> sb = Stream.builder();
 
@@ -77,25 +89,25 @@ class UserDtoTest {
         map = getCorrectNewViewMap();
         map.put("email", "wrongEmail");
         String invalidEmail = mapper.writeValueAsString(map);
-        sb.add(Arguments.of(invalidEmail, "emails", false));
+        sb.add(Arguments.of(invalidEmail, "email", false));
 
         map = getCorrectNewViewMap();
-        map.put("password", "short");
+        map.put("password", generateString(7));
         String shortPassword = mapper.writeValueAsString(map);
         sb.add(Arguments.of(shortPassword, "password", false));
 
         map = getCorrectNewViewMap();
-        map.put("password", "too_1234567891234567891234_long");
+        map.put("password", generateString(25));
         String longPassword = mapper.writeValueAsString(map);
         sb.add(Arguments.of(longPassword, "password", false));
 
         map = getCorrectNewViewMap();
-        map.put("name", "s");
+        map.put("name", generateString(1));
         String shortName = mapper.writeValueAsString(map);
         sb.add(Arguments.of(shortName, "name", false));
 
         map = getCorrectNewViewMap();
-        map.put("name", "too_1234567891234567891234_long");
+        map.put("name", generateString(25));
         String longName = mapper.writeValueAsString(map);
         sb.add(Arguments.of(longName, "name", false));
 
@@ -130,7 +142,7 @@ class UserDtoTest {
     }
 
     @SneakyThrows
-    public static Stream<Arguments> update_view_invalid_json_stream() {
+    private static Stream<Arguments> update_view_invalid_json_stream() {
         ObjectMapper mapper = new ObjectMapper();
         Stream.Builder<Arguments> sb = Stream.builder();
 
@@ -184,7 +196,7 @@ class UserDtoTest {
     }
 
     @SneakyThrows
-    public static Stream<Arguments> update_password_view_invalid_json_stream() {
+    private static Stream<Arguments> update_password_view_invalid_json_stream() {
         ObjectMapper mapper = new ObjectMapper();
         Stream.Builder<Arguments> sb = Stream.builder();
 
@@ -237,10 +249,19 @@ class UserDtoTest {
         return sb.build();
     }
 
+    public static String generateString(int size) {
+        Assert.isTrue(size > 0, "Size must be more then 0");
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < size; i++) {
+            str.append("A");
+        }
+        return str.toString();
+    }
+
     @SneakyThrows
     @DisplayName("Pass if returned json not contains private data")
     @Test
-    public void responseView() {
+    void responseView() {
         UserDto userDto = new UserDto("id",
                                       "email",
                                       "password",
@@ -255,18 +276,7 @@ class UserDtoTest {
                 .forView(View.Response.class)
                 .write(userDto);
 
-        Map<String, Object> responseView = new HashMap<>();
-        responseView.put("id", userDto.getId());
-        responseView.put("email", userDto.getEmail());
-        responseView.put("name", userDto.getName());
-        responseView.put("picture", userDto.getPicture());
-        responseView.put("authType", userDto
-                .getAuthType()
-                .name());
-        responseView.put("role", userDto
-                .getRole()
-                .name());
-        String expectedJson = mapper.writeValueAsString(responseView);
+        String expectedJson = mapper.writeValueAsString(getCorrectResponseViewMap(userDto));
 
         assertThat(result).isEqualToJson(expectedJson);
 
@@ -278,9 +288,9 @@ class UserDtoTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("new_view_invalid_json_stream")
-    public void newView(String jsonRequest,
-                        String propertyPath,
-                        boolean expected) {
+    void newView(String jsonRequest,
+                 String propertyPath,
+                 boolean expected) {
         UserDto result = this.jacksonTester
                 .parse(jsonRequest)
                 .getObject();
@@ -302,9 +312,9 @@ class UserDtoTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("update_view_invalid_json_stream")
-    public void updateView(String jsonRequest,
-                           String propertyPath,
-                           boolean expected) {
+    void updateView(String jsonRequest,
+                    String propertyPath,
+                    boolean expected) {
         UserDto result = this.jacksonTester
                 .parse(jsonRequest)
                 .getObject();
@@ -326,9 +336,9 @@ class UserDtoTest {
     @SneakyThrows
     @ParameterizedTest
     @MethodSource("update_password_view_invalid_json_stream")
-    public void updatePasswordView(String jsonRequest,
-                                   String propertyPath,
-                                   boolean expected) {
+    void updatePasswordView(String jsonRequest,
+                            String propertyPath,
+                            boolean expected) {
         UserDto result = this.jacksonTester
                 .parse(jsonRequest)
                 .getObject();

@@ -11,6 +11,7 @@ import ru.rumal.wishlist.model.entity.BaseEntity;
 import ru.rumal.wishlist.model.entity.Gift;
 import ru.rumal.wishlist.validation.ValueOfEnum;
 
+import javax.validation.Payload;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -26,6 +27,7 @@ public class GiftDto implements BaseDto {
     @JsonView(View.Response.class)
     private Long id;
 
+
     @NotNull(groups = {View.New.class, View.Update.class})
     @NotBlank(groups = {View.New.class, View.Update.class})
     @NotEmpty(groups = {View.New.class, View.Update.class})
@@ -33,14 +35,23 @@ public class GiftDto implements BaseDto {
     @JsonView(View.Response.class)
     private String name;
 
+    @Null(groups = {View.New.class, View.Update.class})
+    @NotBlank(groups = {View.New.class, View.Update.class}, payload = Payload.class)
+    @NotEmpty(groups = {View.New.class, View.Update.class})
     @Length(groups = {View.New.class, View.Update.class}, min = 2, max = 255)
     @JsonView(View.Response.class)
     private String link;
 
+    @Null(groups = {View.New.class, View.Update.class})
+    @NotBlank(groups = {View.New.class, View.Update.class})
+    @NotEmpty(groups = {View.New.class, View.Update.class})
     @Length(groups = {View.New.class, View.Update.class}, min = 2, max = 255)
     @JsonView(View.Response.class)
     private String picture;
 
+    @Null(groups = {View.New.class, View.Update.class})
+    @NotBlank(groups = {View.New.class, View.Update.class})
+    @NotEmpty(groups = {View.New.class, View.Update.class})
     @Length(groups = {View.New.class, View.Update.class}, min = 2, max = 255)
     @JsonView(View.Response.class)
     private String description;
@@ -50,6 +61,9 @@ public class GiftDto implements BaseDto {
     @ValueOfEnum(groups = {View.Update.class}, enumClass = GiftStatus.class)
     @JsonView(View.Response.class)
     private GiftStatus status;
+
+    @JsonView(View.Response.class)
+    private Long tagId;
 
     @Override
     public BaseEntity toBaseEntity() {

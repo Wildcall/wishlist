@@ -10,11 +10,12 @@ import java.util.HashSet;
 class UserServiceImplTest {
 
     @Test
-    void generateRandomId() {
+    void generateRandomId_isNotEqual() {
         UserService impl = new UserServiceImpl(null);
         HashSet<String> set = new HashSet<>();
         for (int i = 0; i < 1000; i++) {
             String buffer = impl.generateRandomId(null);
+            Assertions.assertNotEquals(null, buffer);
             Assertions.assertEquals(false, set.contains(buffer));
             set.add(buffer);
         }

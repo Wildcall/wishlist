@@ -10,6 +10,7 @@ import ru.rumal.wishlist.repository.UserRepo;
 import ru.rumal.wishlist.service.UserService;
 
 import java.util.Optional;
+import java.util.Random;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -17,6 +18,8 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
+    private final Random random = new Random();
+
 
     @Override
     public Optional<User> save(User user) {
@@ -44,7 +47,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String generateRandomId(User user) {
-        return null;
+        long value = 1000000L + Math.abs(random.nextLong());
+        return String.valueOf(value);
     }
 
     @Override

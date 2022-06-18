@@ -12,21 +12,16 @@ import java.io.ByteArrayOutputStream;
 import java.util.Random;
 
 public class AvatarServiceImpl implements AvatarService {
-
     public final String BASE64_PREFIX = "data:image/png;base64,";
     public final int width = 20;
     public final int grid = 5;
 
     @Override
     public String generate(User user) {
-        try {
-            return BASE64_PREFIX + new String(Base64.getEncoder().encode(create(user.hashCode())));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return BASE64_PREFIX + new String(Base64.getEncoder().encode(create()));
     }
 
-    public byte[] create(int id) throws IOException {
+    public byte[] create() {
         int padding = width / 2;
         int size = width * grid + width;
         BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
@@ -45,7 +40,11 @@ public class AvatarServiceImpl implements AvatarService {
         }
         _2d.dispose();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ImageIO.write(img, "png", byteArrayOutputStream);
+        try {
+            ImageIO.write(img, "png", byteArrayOutputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return byteArrayOutputStream.toByteArray();
     }
 

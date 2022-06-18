@@ -1,11 +1,11 @@
 package ru.rumal.wishlist.unit.impl.service;
 
 import org.junit.jupiter.api.Test;
-import ru.rumal.wishlist.integration.utils.TestUserFactory;
-import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.service.AvatarService;
-import ru.rumal.wishlist.service.UserExtractor;
 import ru.rumal.wishlist.service.impl.AvatarServiceImpl;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -13,23 +13,15 @@ class AvatarServiceImplTest {
 
     @Test
     void generate() {
-        AvatarService avatarservice = new AvatarServiceImpl();
-        TestUserFactory factory = new TestUserFactory();
-        User vova = factory.getNewUser();
-        vova.setName("Вова Семенов");
-        System.out.println(avatarservice.generate(vova));
-//        vova.setName("A");
-//         my = "data:image/png;base64," + service.generate(vova);
-//        System.out.println(my);
-//        vova.setName("Vasya");
-//         my = "data:image/png;base64," + service.generate(vova);
-//        System.out.println(my);
-//        vova.setName("Sereja");
-//         my = "data:image/png;base64," + service.generate(vova);
-//        System.out.println(my);
-//        vova.setName("Vova");
-//         my = "data:image/png;base64," + service.generate(vova);
-//        System.out.println(my);
+        AvatarService impl = new AvatarServiceImpl();
+        Set<String> set = new HashSet<>();
+        for (int i = 0; i < 15; i++) {
+            String buffer = impl.generate(null);
+            assertNotEquals(null, buffer);
+            assertTrue(buffer.length() > 100);
+            assertFalse(set.contains(buffer));
+            set.add(buffer);
+        }
     }
 }
 

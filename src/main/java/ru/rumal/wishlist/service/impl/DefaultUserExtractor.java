@@ -6,6 +6,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
+import ru.rumal.wishlist.model.AuthType;
+import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.service.UserExtractor;
 import ru.rumal.wishlist.service.UserService;
@@ -22,11 +24,15 @@ public class DefaultUserExtractor implements UserExtractor {
                                OidcUser oidcUser) {
         User user = new User();
         if ("google".equals(clientRegistrationId)) {
+            user.setId(oidcUser.getAttribute("sub"));
             user.setEmail(oidcUser.getAttribute("email"));
-            user.setName(oidcUser.getAttribute("name"));
             user.setPassword(null);
+            user.setName(oidcUser.getAttribute("name"));
             user.setPicture(oidcUser.getAttribute("picture"));
+            user.setAuthType(AuthType.GOOGLE);
             user.setEnable(oidcUser.getAttribute("email_verified"));
+            user.setRole(Role.USER);
+
             userService.save(user);
         }
     }

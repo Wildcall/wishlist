@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.UserRepo;
@@ -26,8 +27,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> save(User user) {
         if (existByEmail(user.getEmail())) return Optional.empty();
-        user.setId(generateRandomId(user));
-        user.setRole(Role.USER);
+
+        if (user.getId() == null) user.setId(generateRandomId(user));
+
+        if (user.getRole() == null) user.setRole(Role.USER);
+
+        if (user.getAuthType() == null) user.setAuthType(AuthType.APPLICATION);
+
         if (user.getPicture() == null) user.setPicture(avatarService.generate(user));
         return Optional.of(userRepo.save(user));
     }

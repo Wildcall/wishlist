@@ -19,9 +19,8 @@ import java.util.Random;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepo userRepo;
     private final Random random = new Random();
-
+    private final UserRepo userRepo;
     private final AvatarService avatarService;
 
     @Override

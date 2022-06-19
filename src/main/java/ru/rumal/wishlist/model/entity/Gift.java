@@ -53,7 +53,7 @@ public class Gift implements BaseEntity {
                 this.link,
                 this.picture,
                 this.description,
-                this.status,
+                this.status.name(),
                 this.tag.getId());
     }
 }

@@ -5,16 +5,13 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 import ru.rumal.wishlist.model.GiftStatus;
 import ru.rumal.wishlist.model.entity.BaseEntity;
 import ru.rumal.wishlist.model.entity.Gift;
-import ru.rumal.wishlist.validation.ValueOfEnum;
+import ru.rumal.wishlist.validation.CustomEnum;
+import ru.rumal.wishlist.validation.CustomLong;
+import ru.rumal.wishlist.validation.CustomString;
 
-import javax.validation.Payload;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 
 @Data
@@ -27,41 +24,28 @@ public class GiftDto implements BaseDto {
     @JsonView(View.Response.class)
     private Long id;
 
-
-    @NotNull(groups = {View.New.class, View.Update.class})
-    @NotBlank(groups = {View.New.class, View.Update.class})
-    @NotEmpty(groups = {View.New.class, View.Update.class})
-    @Length(groups = {View.New.class, View.Update.class}, min = 2, max = 255)
+    @CustomString(groups = {View.New.class, View.Update.class}, min = 2)
     @JsonView(View.Response.class)
     private String name;
 
-    @Null(groups = {View.New.class, View.Update.class})
-    @NotBlank(groups = {View.New.class, View.Update.class}, payload = Payload.class)
-    @NotEmpty(groups = {View.New.class, View.Update.class})
-    @Length(groups = {View.New.class, View.Update.class}, min = 2, max = 255)
+    @CustomString(groups = {View.New.class, View.Update.class}, min = 2, nullable = true)
     @JsonView(View.Response.class)
     private String link;
 
-    @Null(groups = {View.New.class, View.Update.class})
-    @NotBlank(groups = {View.New.class, View.Update.class})
-    @NotEmpty(groups = {View.New.class, View.Update.class})
-    @Length(groups = {View.New.class, View.Update.class}, min = 2, max = 255)
+    @CustomString(groups = {View.New.class, View.Update.class}, min = 2, nullable = true)
     @JsonView(View.Response.class)
     private String picture;
 
-    @Null(groups = {View.New.class, View.Update.class})
-    @NotBlank(groups = {View.New.class, View.Update.class})
-    @NotEmpty(groups = {View.New.class, View.Update.class})
-    @Length(groups = {View.New.class, View.Update.class}, min = 2, max = 255)
+    @CustomString(groups = {View.New.class, View.Update.class}, min = 2, nullable = true)
     @JsonView(View.Response.class)
     private String description;
 
     @Null(groups = {View.New.class})
-    @NotNull(groups = {View.Update.class})
-    @ValueOfEnum(groups = {View.Update.class}, enumClass = GiftStatus.class)
+    @CustomEnum(groups = {View.Update.class}, enumClass = GiftStatus.class, nullable = true)
     @JsonView(View.Response.class)
-    private GiftStatus status;
+    private String status;
 
+    @CustomLong(groups = {View.New.class, View.Update.class}, min = 0, nullable = true)
     @JsonView(View.Response.class)
     private Long tagId;
 
@@ -73,7 +57,7 @@ public class GiftDto implements BaseDto {
         gift.setLink(this.link);
         gift.setPicture(this.picture);
         gift.setDescription(this.description);
-        gift.setStatus(this.status);
+        gift.setStatus(GiftStatus.valueOf(status));
         return gift;
     }
 }

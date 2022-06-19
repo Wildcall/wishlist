@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ValueOfEnumValidator implements ConstraintValidator<ValueOfEnum, CharSequence> {
+public class CustomEnumValidator implements ConstraintValidator<CustomEnum, Object> {
+
     private List<String> acceptedValues;
+    private boolean nullable;
 
     @Override
-    public void initialize(ValueOfEnum annotation) {
+    public void initialize(CustomEnum annotation) {
+        this.nullable = annotation.nullable();
         acceptedValues = Stream
                 .of(annotation
                             .enumClass()
@@ -20,10 +23,11 @@ public class ValueOfEnumValidator implements ConstraintValidator<ValueOfEnum, Ch
     }
 
     @Override
-    public boolean isValid(CharSequence chars,
+    public boolean isValid(Object o,
                            ConstraintValidatorContext constraintValidatorContext) {
-        if (chars == null)
-            return true;
-        return acceptedValues.contains(chars);
+        if (nullable && o == null) return true;
+        if (o == null) return false;
+
+        return acceptedValues.contains(o.toString());
     }
 }

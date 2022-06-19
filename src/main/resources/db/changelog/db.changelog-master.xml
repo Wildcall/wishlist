@@ -160,6 +160,7 @@
         </createTable>
 
         <renameColumn tableName="_user" oldColumnName="email" newColumnName="id"/>
+        <dropColumn tableName="_user" columnName="picture"/>
         <addColumn tableName="_user">
             <column name="email" type="varchar(255)">
                 <constraints nullable="false" unique="true"/>
@@ -169,6 +170,9 @@
             </column>
             <column name="role" type="varchar(64)">
                 <constraints nullable="false"/>
+            </column>
+            <column name="picture" type="varchar(1000)">
+                <constraints nullable="true"/>
             </column>
         </addColumn>
 

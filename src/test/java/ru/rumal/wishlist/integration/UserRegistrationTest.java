@@ -70,7 +70,7 @@ public class UserRegistrationTest {
                               jsonPath("$.id").hasJsonPath(),
                               jsonPath("$.email", is(request.getEmail())),
                               jsonPath("$.name", is(request.getName())),
-                              jsonPath("$.picture", is("")),
+                              jsonPath("$.picture").isString(),
                               jsonPath("$.authType", is(AuthType.APPLICATION.name())),
                               jsonPath("$.role", is(Role.USER.name())),
                               jsonPath("$.password").doesNotExist());
@@ -84,7 +84,7 @@ public class UserRegistrationTest {
         Assertions.assertEquals(savedUser.getEmail(), newUser.getEmail());
         Assertions.assertTrue(passwordEncoder.matches(newUser.getPassword(), savedUser.getPassword()));
         Assertions.assertEquals(savedUser.getName(), newUser.getName());
-        Assertions.assertEquals(savedUser.getPicture(), newUser.getPicture());
+        Assertions.assertNotNull(savedUser.getPicture());
         Assertions.assertEquals(savedUser.getAuthType(), AuthType.APPLICATION);
         Assertions.assertEquals(savedUser.getEnable(), newUser.getEnable());
         Assertions.assertEquals(savedUser.getRole(), Role.USER);

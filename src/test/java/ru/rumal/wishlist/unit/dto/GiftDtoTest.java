@@ -21,7 +21,6 @@ import ru.rumal.wishlist.model.dto.View;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -49,9 +48,7 @@ class GiftDtoTest {
         requestView.put("link", giftDto.getLink());
         requestView.put("picture", giftDto.getPicture());
         requestView.put("description", giftDto.getDescription());
-        requestView.put("status", giftDto
-                .getStatus()
-                .name());
+        requestView.put("status", giftDto.getStatus());
         requestView.put("tagId", giftDto.getTagId());
         return requestView;
     }
@@ -59,9 +56,13 @@ class GiftDtoTest {
     private static Map<String, Object> getCorrectNewViewMap() {
         Map<String, Object> requestView = new HashMap<>();
         requestView.put("name", "New gift");
-        requestView.put("link", null);
-        requestView.put("picture", null);
-        requestView.put("description",null);
+        return requestView;
+    }
+
+    private static Map<String, Object> getCorrectUpdateViewMap() {
+        Map<String, Object> requestView = new HashMap<>();
+        requestView.put("name", "New gift");
+        requestView.put("status", GiftStatus.NEW);
         return requestView;
     }
 
@@ -74,12 +75,62 @@ class GiftDtoTest {
         String valid = mapper.writeValueAsString(map);
         sb.add(Arguments.of(valid, null, true));
 
+        map = getCorrectNewViewMap();
+        map.put("tagId", -1L);
+        String tagBelowZero = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(tagBelowZero, "tagId", false));
+
         //  @formatter:off
         Stream.of("name", "link", "picture", "description")
                 .forEach(field -> Stream.of(generateString(1), generateString(256), "", "   ")
                         .forEach(value -> {
                             try {
                                 Map<String, Object> correctNewViewMap = getCorrectNewViewMap();
+                                correctNewViewMap.put(field, value);
+                                String json = mapper.writeValueAsString(correctNewViewMap);
+                                sb.add(Arguments.of(json, field, false));
+                            } catch (JsonProcessingException ignored) {}
+                        }));
+        //  @formatter:on
+        return sb.build();
+    }
+
+    @SneakyThrows
+    private static Stream<Arguments> update_view_invalid_json_stream() {
+        ObjectMapper mapper = new ObjectMapper();
+        Stream.Builder<Arguments> sb = Stream.builder();
+
+        Map<String, Object> map = getCorrectUpdateViewMap();
+        String valid = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(valid, null, true));
+
+        map = getCorrectUpdateViewMap();
+        map.put("status", GiftStatus.RECEIVED.name());
+        String valid_RECEIVED_Status = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(valid_RECEIVED_Status, null, true));
+
+        map = getCorrectUpdateViewMap();
+        map.put("status", GiftStatus.RESERVED.name());
+        String valid_RESERVED_Status = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(valid_RESERVED_Status, null, true));
+
+        map = getCorrectUpdateViewMap();
+        map.put("status", "WRONG");
+        String wrongStatus = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(wrongStatus, "status", false));
+
+        map = getCorrectUpdateViewMap();
+        map.put("tagId", -1L);
+        String tagBelowZero = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(tagBelowZero, "tagId", false));
+
+
+        //  @formatter:off
+        Stream.of("name", "link", "picture", "description")
+                .forEach(field -> Stream.of(generateString(1), generateString(256), "", "   ")
+                        .forEach(value -> {
+                            try {
+                                Map<String, Object> correctNewViewMap = getCorrectUpdateViewMap();
                                 correctNewViewMap.put(field, value);
                                 String json = mapper.writeValueAsString(correctNewViewMap);
                                 sb.add(Arguments.of(json, field, false));
@@ -107,7 +158,7 @@ class GiftDtoTest {
                                       "link to gift",
                                       "link to gift picture",
                                       "description",
-                                      GiftStatus.NEW,
+                                      GiftStatus.NEW.name(),
                                       22L);
 
         JsonContent<GiftDto> result = this.jacksonTester
@@ -131,7 +182,30 @@ class GiftDtoTest {
 
         Set<ConstraintViolation<GiftDto>> violations = validator.validate(result, View.New.class);
         Assertions.assertEquals(violations.isEmpty(), expected);
-        violations.forEach(v -> System.out.println(v.getPropertyPath() + " " + v.getMessage()));
+        if (!expected) {
+            long count = violations
+                    .stream()
+                    .filter(v -> !v
+                            .getPropertyPath()
+                            .toString()
+                            .equals(propertyPath))
+                    .count();
+            Assertions.assertEquals(count, 0, "Wrong field throw exception");
+        }
+    }
+
+    @SneakyThrows
+    @ParameterizedTest
+    @MethodSource("update_view_invalid_json_stream")
+    void updateView(String jsonRequest,
+                    String propertyPath,
+                    boolean expected) {
+        GiftDto result = this.jacksonTester
+                .parse(jsonRequest)
+                .getObject();
+
+        Set<ConstraintViolation<GiftDto>> violations = validator.validate(result, View.Update.class);
+        Assertions.assertEquals(violations.isEmpty(), expected);
         if (!expected) {
             long count = violations
                     .stream()

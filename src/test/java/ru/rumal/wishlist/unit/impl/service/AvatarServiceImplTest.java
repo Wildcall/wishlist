@@ -11,12 +11,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AvatarServiceImplTest {
 
+    private final AvatarService avatarService = new AvatarServiceImpl();
+
     @Test
     void generate() {
-        AvatarService impl = new AvatarServiceImpl();
         Set<String> set = new HashSet<>();
         for (int i = 0; i < 15; i++) {
-            String buffer = impl.generate(null);
+            String buffer = avatarService.generate(null);
             assertNotEquals(null, buffer);
             assertTrue(buffer.length() > 100);
             assertFalse(set.contains(buffer));

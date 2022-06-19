@@ -9,11 +9,17 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = MaybeNullValidator.class)
-public @interface MaybeNullStringField {
+@Constraint(validatedBy = CustomStringValidator.class)
+public @interface CustomString {
     String message() default "Invalid input string field";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+
+    boolean nullable() default false;
+
+    int min() default 1;
+
+    int max() default 255;
 }

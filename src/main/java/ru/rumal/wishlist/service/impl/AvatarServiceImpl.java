@@ -1,18 +1,26 @@
 package ru.rumal.wishlist.service.impl;
 
+import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.service.AvatarService;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.IOException;
-import java.util.Base64;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Base64;
 import java.util.Random;
 
+@Service
 public class AvatarServiceImpl implements AvatarService {
-    public final String BASE64_PREFIX = "data:image/png;base64,";
+
+    private final Random random = new Random();
+    private final String BASE64_PREFIX = "data:image/png;base64,";
+    private final int MIN_COLOR = 80;
+    private final int MAX_COLOR = 200;
+    private int width = 20;
+    private int grid = 5;
 
     public void setWidth(int width) {
         if (width < 1) throw new IllegalArgumentException("Width must be greater than 1");
@@ -23,8 +31,6 @@ public class AvatarServiceImpl implements AvatarService {
         if (grid < 1) throw new IllegalArgumentException("Grid must be greater than 1");
         this.grid = grid;
     }
-    public int width = 20;
-    public int grid = 5;
 
     @Override
     public String generate(User user) {
@@ -38,9 +44,8 @@ public class AvatarServiceImpl implements AvatarService {
         Graphics2D _2d = img.createGraphics();
         _2d.setColor(new Color(240, 240, 240));
         _2d.fillRect(0, 0, size, size);
-        _2d.setColor(randomColor(80, 200));
-        Random random = new Random();
-        for (int x = 0; x < Math.ceil(grid  /2.); x++) {
+        _2d.setColor(getRandomColor());
+        for (int x = 0; x < Math.ceil(grid / 2.); x++) {
             for (int y = 0; y < grid; y++) {
                 if (random.nextInt(10) < 6) {
                     _2d.fillRect((padding + x * width), (padding + y * width), width, width);
@@ -58,13 +63,10 @@ public class AvatarServiceImpl implements AvatarService {
         return byteArrayOutputStream.toByteArray();
     }
 
-    private Color randomColor(int min, int max) {
-        Random random = new Random();
-        int r = min + random.nextInt(Math.abs(max - min));
-        int g = min + random.nextInt(Math.abs(max - min));
-        int b = min + random.nextInt(Math.abs(max - min));
+    private Color getRandomColor() {
+        int r = MIN_COLOR + random.nextInt(Math.abs(MAX_COLOR - MIN_COLOR));
+        int g = MIN_COLOR + random.nextInt(Math.abs(MAX_COLOR - MIN_COLOR));
+        int b = MIN_COLOR + random.nextInt(Math.abs(MAX_COLOR - MIN_COLOR));
         return new Color(r, g, b);
     }
-
 }
-

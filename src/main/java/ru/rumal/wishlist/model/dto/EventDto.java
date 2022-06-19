@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import ru.rumal.wishlist.model.entity.BaseEntity;
 import ru.rumal.wishlist.model.entity.Event;
+import ru.rumal.wishlist.validation.CustomString;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -26,14 +27,11 @@ public class EventDto implements BaseDto {
     @JsonView(View.Response.class)
     private Long id;
 
-    @NotNull(groups = {View.New.class, View.Update.class})
-    @NotBlank(groups = {View.New.class, View.Update.class})
-    @NotEmpty(groups = {View.New.class, View.Update.class})
-    @Length(groups = {View.New.class, View.Update.class}, min = 2, max = 255)
+    @CustomString(groups = {View.New.class, View.Update.class}, min = 2)
     @JsonView(View.Response.class)
     private String name;
 
-    @Length(groups = {View.New.class, View.Update.class}, max = 255)
+    @CustomString(groups = {View.New.class, View.Update.class}, min = 2, nullable = true)
     @JsonView(View.Response.class)
     private String description;
 

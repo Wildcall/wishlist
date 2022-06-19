@@ -5,5 +5,6 @@ public class View {
     public interface Response {}
     public interface Request {}
     public interface Update {}
+    public interface UpdatePassword {}
     public interface Private {}
 }

@@ -39,8 +39,8 @@ public class DefaultUserExtractor implements UserExtractor {
                 .getPrincipal();
         if (principal
                 .getClass()
-                .equals(String.class)) {
-            return (String) principal;
+                .equals(User.class)) {
+            return ((User) principal).getEmail();
         }
         if (principal
                 .getClass()

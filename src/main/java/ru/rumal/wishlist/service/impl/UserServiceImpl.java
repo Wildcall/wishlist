@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.UserRepo;
+import ru.rumal.wishlist.service.AvatarService;
 import ru.rumal.wishlist.service.UserService;
 
 import java.util.Optional;
@@ -17,13 +19,16 @@ import java.util.Random;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepo userRepo;
     private final Random random = new Random();
-
+    private final UserRepo userRepo;
+    private final AvatarService avatarService;
 
     @Override
     public Optional<User> save(User user) {
         if (existByEmail(user.getEmail())) return Optional.empty();
+        user.setId(generateRandomId(user));
+        user.setRole(Role.USER);
+        if (user.getPicture() == null) user.setPicture(avatarService.generate(user));
         return Optional.of(userRepo.save(user));
     }
 

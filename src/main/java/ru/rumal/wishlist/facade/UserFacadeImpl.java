@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.exception.BadRequestException;
+import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.UserDto;
 import ru.rumal.wishlist.model.entity.User;
@@ -23,6 +24,7 @@ public class UserFacadeImpl implements UserFacade {
     @Override
     public BaseDto getInfo() {
         String email = userExtractor.extractEmail();
+
         return userService
                 .findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("Email not found"))
@@ -47,12 +49,10 @@ public class UserFacadeImpl implements UserFacade {
 
     @Override
     public BaseDto registration(UserDto userDto) {
-        User user = new User();
-        user.setEmail(userDto.getEmail());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        user.setName(userDto.getName());
+        User user = (User) userDto.toBaseEntity();
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setEnable(true);
-        user.setPicture("");
+        user.setAuthType(AuthType.APPLICATION);
         return userService
                 .save(user)
                 .orElseThrow(() -> new BadRequestException("Email already exist"))

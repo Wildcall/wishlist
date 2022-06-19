@@ -1,46 +1,40 @@
 <template>
   <v-app>
+    <v-app-bar app>
+      <v-container class="d-flex justify-end">
+        <v-btn
+            v-if="isAuth"
+            href="/api/v1/auth/logout"
+            text
+            plain
+        >
+          Logout
+        </v-btn>
+      </v-container>
+    </v-app-bar>
     <v-main>
-      <div v-if="isAuth">
-        <h1>Вы авторизованы</h1>
-      </div>
-      <div>
-        With Google: <a href="/oauth2/authorization/google">click here</a>
-      </div>
-      <div>
-        Logout: <a href="/api/v1/auth/logout">click here</a>
-      </div>
-      <v-btn
-          @click="deleteUser"
-      >
-        Delete
-      </v-btn>
+      <auth v-if="!isAuth"/>
+      <about v-if="isAuth"/>
     </v-main>
   </v-app>
 </template>
 
-<script>
-import Vue from "vue";
+<script lang="js">
+import Auth from "./components/Auth.vue";
+import About from "./components/About.vue";
 
 export default {
   name: 'App',
 
-  data: () => ({
-    isAuth: auth
-  }),
+  components: {About, Auth},
 
-  methods: {
-    deleteUser() {
-      Vue.http.delete("/api/v1/user")
-      //     .then(response => {
-      //   if (response) {
-      //     const location = response.headers.get("location");
-      //     if (location)
-      //       Vue.http.get(location)
-      //   }
-      // })
+  data() {
+    return {
+      isAuth: auth
     }
   },
+
+  methods: {},
 
   mounted() {
   }

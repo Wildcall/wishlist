@@ -1,8 +1,8 @@
 package ru.rumal.wishlist.unit.impl.service;
 
 import org.junit.jupiter.api.Test;
-import ru.rumal.wishlist.service.AvatarService;
-import ru.rumal.wishlist.service.impl.AvatarServiceImpl;
+import ru.rumal.wishlist.model.entity.service.AvatarService;
+import ru.rumal.wishlist.model.entity.service.impl.AvatarServiceImpl;
 
 import java.util.HashSet;
 import java.util.Set;

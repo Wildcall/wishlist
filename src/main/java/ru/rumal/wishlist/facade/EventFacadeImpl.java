@@ -9,7 +9,7 @@ import ru.rumal.wishlist.model.dto.EventDto;
 import ru.rumal.wishlist.model.entity.BasicEvent;
 import ru.rumal.wishlist.model.entity.Event;
 import ru.rumal.wishlist.model.entity.User;
-import ru.rumal.wishlist.service.EventService;
+import ru.rumal.wishlist.model.entity.service.EventService;
 
 import java.security.Principal;
 import java.util.List;

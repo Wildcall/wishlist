@@ -11,8 +11,8 @@ import ru.rumal.wishlist.model.entity.Event;
 import ru.rumal.wishlist.model.entity.Gift;
 import ru.rumal.wishlist.model.entity.Tag;
 import ru.rumal.wishlist.model.entity.User;
-import ru.rumal.wishlist.service.GiftService;
-import ru.rumal.wishlist.service.TagService;
+import ru.rumal.wishlist.model.entity.service.GiftService;
+import ru.rumal.wishlist.model.entity.service.TagService;
 
 import java.security.Principal;
 import java.util.List;

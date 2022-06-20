@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.integration;
+package ru.rumal.wishlist.integration.user;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
@@ -9,15 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.rumal.wishlist.integration.context.WithMockAppUser;
 import ru.rumal.wishlist.integration.utils.TestUserFactory;
 import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.entity.User;
+import ru.rumal.wishlist.repository.UserRepo;
 
 import static org.hamcrest.Matchers.is;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.rumal.wishlist.integration.utils.HttpResponseApiError.isApiError;
@@ -28,7 +30,7 @@ import static ru.rumal.wishlist.integration.utils.HttpResponseApiError.isApiErro
 @Import(TestUserFactory.class)
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-public class UserLoginTest {
+public class UserInfoTest {
 
     @Autowired
     private TestUserFactory testUserFactory;
@@ -36,19 +38,15 @@ public class UserLoginTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @DisplayName("Return user info when credentials is valid")
+    @DisplayName("Return user info without password when user authenticated")
+    @WithMockAppUser
     @Test
-    public void loginWithCorrectCredentials() throws Exception {
+    public void infoReturnInfoWhenAuthenticated() throws Exception {
         testUserFactory.initDB();
         User correctUser = testUserFactory.getCorrectUser();
+
         this.mockMvc
-                .perform(post("/api/v1/auth/login")
-                                 .contentType("application/x-www-form-urlencoded")
-                                 .param("email", testUserFactory
-                                         .getCorrectEmail())
-                                 .param("password", testUserFactory
-                                         .getCorrectPasswordDecrypt())
-                                 .with(csrf()))
+                .perform(get("/api/v1/user"))
                 .andDo(print())
                 .andExpectAll(status().isOk(),
                               content().contentType("application/json"),
@@ -56,27 +54,19 @@ public class UserLoginTest {
                               jsonPath("$.email", is(correctUser.getEmail())),
                               jsonPath("$.name", is(correctUser.getName())),
                               jsonPath("$.picture", is(correctUser.getPicture())),
-                              jsonPath("$.authType", is(correctUser
-                                                                .getAuthType()
-                                                                .name())),
+                              jsonPath("$.authType", is(correctUser.getAuthType().name())),
                               jsonPath("$.role", is(Role.USER.name())),
                               jsonPath("$.password").doesNotExist());
         testUserFactory.clearDB();
     }
 
-    @DisplayName("Return error when credentials is not valid")
+    @DisplayName("Return api error when user not authenticated")
     @Test
-    public void loginWithBadCredentials() throws Exception {
+    public void infoReturnApiErrorWhenNotAuthenticated() throws Exception {
         this.mockMvc
-                .perform(post("/api/v1/auth/login")
-                                 .contentType("application/x-www-form-urlencoded")
-                                 .param("email", testUserFactory
-                                         .getWrongEmail())
-                                 .param("password", testUserFactory
-                                         .getWrongPassword())
-                                 .with(csrf()))
+                .perform(get("/api/v1/user"))
                 .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpectAll(isApiError("Email or password is invalid", "BAD_REQUEST"));
+                .andExpect(status().isForbidden())
+                .andExpectAll(isApiError("Access denied", "FORBIDDEN"));
     }
 }

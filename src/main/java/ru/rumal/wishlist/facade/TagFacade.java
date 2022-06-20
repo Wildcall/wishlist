@@ -1,21 +1,23 @@
 package ru.rumal.wishlist.facade;
 
 import ru.rumal.wishlist.model.dto.BaseDto;
-import ru.rumal.wishlist.model.dto.GiftDto;
+import ru.rumal.wishlist.model.dto.TagDto;
 
 import java.security.Principal;
 import java.util.List;
 
-public interface GiftFacade {
+public interface TagFacade {
     BaseDto create(Principal principal,
-                   GiftDto giftDto);
+                   TagDto tagDto);
 
     List<BaseDto> getAll(Principal principal);
 
-    BaseDto update(Principal principal,
-                   Long id,
-                   GiftDto giftDto);
-
     Long delete(Principal principal,
                 Long id);
+
+    BaseDto update(Principal principal,
+                   Long id,
+                   TagDto tagDto);
+
+    List<BaseDto> getAllBasic();
 }

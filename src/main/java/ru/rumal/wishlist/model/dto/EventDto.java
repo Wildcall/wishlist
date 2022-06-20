@@ -6,16 +6,14 @@ import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 import ru.rumal.wishlist.model.entity.BaseEntity;
 import ru.rumal.wishlist.model.entity.Event;
 import ru.rumal.wishlist.validation.CustomString;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -39,6 +37,12 @@ public class EventDto implements BaseDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonView(View.Response.class)
     private LocalDateTime date;
+
+    @Null(groups = {View.New.class})
+    @NotNull(groups = {View.Update.class})
+    @JsonView(View.Response.class)
+    private Set<Long> giftsSet;
+
 
     @Override
     public BaseEntity toBaseEntity() {

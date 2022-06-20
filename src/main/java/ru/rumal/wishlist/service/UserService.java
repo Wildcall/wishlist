@@ -8,11 +8,17 @@ import java.util.Optional;
 public interface UserService extends UserDetailsService {
     Optional<User> save(User user);
 
+    Optional<User> update(User user);
+
+    Optional<User> findById(String id);
+
     Optional<User> findByEmail(String email);
 
     boolean existByEmail(String email);
 
-    boolean delete(User user);
+    boolean existById(String id);
+
+    boolean delete(String id);
 
     String generateRandomId(User user);
 }

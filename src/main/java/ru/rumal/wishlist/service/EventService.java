@@ -1,19 +1,22 @@
 package ru.rumal.wishlist.service;
 
-import ru.rumal.wishlist.model.dto.BaseDto;
+import ru.rumal.wishlist.model.entity.BasicEvent;
 import ru.rumal.wishlist.model.entity.Event;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface EventService {
     Event save(Event event);
 
-    List<Event> getAll(String email);
+    List<Event> getAll(String id);
 
-    Long deleteByIdAndUserEmail(Long id,
-                                String email);
+    boolean deleteByIdAndUserId(Long id,
+                                String userId);
 
-    BaseDto updateByIdAndUserEmail(Long id,
-                                   String email,
-                                   Event event);
+    Optional<Event> updateByIdAndUserId(Long id,
+                                        String userId,
+                                        Event event);
+
+    List<BasicEvent> getBasic();
 }

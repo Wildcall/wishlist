@@ -10,7 +10,9 @@ import ru.rumal.wishlist.model.dto.EventDto;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -32,7 +34,7 @@ public class Event implements BaseEntity {
     private User user;
 
     @ToString.Exclude
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "_event_gift",
             joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "gift_id"))
@@ -40,11 +42,15 @@ public class Event implements BaseEntity {
 
     @Override
     public BaseDto toBaseDto() {
-        EventDto event = new EventDto();
-        event.setId(this.id);
-        event.setName(this.name);
-        event.setDescription(this.description);
-        event.setDate(this.date);
-        return event;
+        return new EventDto(this.id,
+                            this.name,
+                            this.description,
+                            this.date,
+                            this.gifts != null
+                                    ? this.gifts
+                                            .stream()
+                                            .map(Gift::getId)
+                                            .collect(Collectors.toSet())
+                                    : new HashSet<>());
     }
 }

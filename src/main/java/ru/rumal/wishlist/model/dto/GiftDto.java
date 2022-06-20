@@ -57,7 +57,7 @@ public class GiftDto implements BaseDto {
         gift.setLink(this.link);
         gift.setPicture(this.picture);
         gift.setDescription(this.description);
-        gift.setStatus(GiftStatus.valueOf(status));
+        gift.setStatus(status != null ? GiftStatus.valueOf(status) : null);
         return gift;
     }
 }

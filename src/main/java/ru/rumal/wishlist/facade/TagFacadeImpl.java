@@ -5,43 +5,43 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.exception.BadRequestException;
 import ru.rumal.wishlist.model.dto.BaseDto;
-import ru.rumal.wishlist.model.dto.EventDto;
-import ru.rumal.wishlist.model.entity.BasicEvent;
-import ru.rumal.wishlist.model.entity.Event;
+import ru.rumal.wishlist.model.dto.TagDto;
+import ru.rumal.wishlist.model.entity.BasicTag;
+import ru.rumal.wishlist.model.entity.Tag;
 import ru.rumal.wishlist.model.entity.User;
-import ru.rumal.wishlist.service.EventService;
+import ru.rumal.wishlist.service.TagService;
 
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 @Service
-public class EventFacadeImpl implements EventFacade {
+public class TagFacadeImpl implements TagFacade {
 
-    private final EventService eventService;
+    private final TagService tagService;
 
     @Override
     public BaseDto create(Principal principal,
-                          EventDto eventDto) {
+                          TagDto tagDto) {
         String id = principal.getName();
+        Tag tag = (Tag) tagDto.toBaseEntity();
+        tag.setUser(new User(id));
 
-        Event event = (Event) eventDto.toBaseEntity();
-        event.setUser(new User(id));
-
-        return eventService
-                .save(event)
+        return tagService
+                .save(tag)
                 .toBaseDto();
     }
 
     @Override
     public List<BaseDto> getAll(Principal principal) {
         String userId = principal.getName();
-        List<Event> events = eventService.getAll(userId);
+
+        List<Tag> events = tagService.getAll(userId);
         return events
                 .stream()
-                .map(Event::toBaseDto)
+                .map(Tag::toBaseDto)
                 .collect(Collectors.toList());
     }
 
@@ -49,30 +49,30 @@ public class EventFacadeImpl implements EventFacade {
     public Long delete(Principal principal,
                        Long id) {
         String userId = principal.getName();
-        if (eventService.deleteByIdAndUserId(id, userId)) return id;
-        throw new BadRequestException("Event not found");
+        if (tagService.deleteByIdAndUserId(id, userId)) return id;
+        throw new BadRequestException("Tag not found");
     }
 
     @Override
     public BaseDto update(Principal principal,
                           Long id,
-                          EventDto eventDto) {
+                          TagDto tagDto) {
         String userId = principal.getName();
 
-        Event event = (Event) eventDto.toBaseEntity();
-        return eventService
-                .updateByIdAndUserId(id, userId, event)
-                .orElseThrow(() -> new BadRequestException("Event not found"))
+        Tag tag = (Tag) tagDto.toBaseEntity();
+        return tagService
+                .updateByIdAndUserId(id, userId, tag)
+                .orElseThrow(() -> new BadRequestException("Tag not found"))
                 .toBaseDto();
     }
 
     @Override
-    public List<BaseDto> getBasic() {
-        List<BasicEvent> basic = eventService.getBasic();
+    public List<BaseDto> getAllBasic() {
+        List<BasicTag> basic = tagService.getBasic();
 
         return basic
                 .stream()
-                .map(BasicEvent::toBaseDto)
+                .map(BasicTag::toBaseDto)
                 .collect(Collectors.toList());
     }
 }

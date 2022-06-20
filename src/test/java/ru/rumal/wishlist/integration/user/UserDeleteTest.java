@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.integration;
+package ru.rumal.wishlist.integration.user;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;

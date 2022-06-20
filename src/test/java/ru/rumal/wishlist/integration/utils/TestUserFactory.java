@@ -23,11 +23,11 @@ public class TestUserFactory {
     private final String wrongEmail = "wrong@wrong.com";
     private final String wrongPassword = "wrong@wrong.com";
     private User correctUser = null;
-    private User existedUser = null;
 
     public User getCorrectUser() {
         if (this.correctUser == null) {
             User user = new User();
+            user.setId("1");
             user.setEmail(correctEmail);
             user.setPassword(correctPassEncrypt);
             user.setName("Testing test");
@@ -35,8 +35,6 @@ public class TestUserFactory {
             user.setAuthType(AuthType.APPLICATION);
             user.setEnable(true);
             user.setRole(Role.USER);
-            String randomId = userService.generateRandomId(user);
-            user.setId(randomId);
             this.correctUser = user;
             return user;
         }
@@ -79,20 +77,14 @@ public class TestUserFactory {
     }
 
     @Data
-    public static class UserUpdateRequest {
-        private String id;
+    public static class UserUpdateInfoRequest {
         private String email;
-        private String password;
         private String name;
+    }
 
-        public User toUser() {
-            User user = new User();
-            user.setEmail(this.email);
-            user.setPassword(this.password);
-            user.setName(this.name);
-            user.setPicture("");
-            user.setEnable(true);
-            return user;
-        }
+    @Data
+    public static class UserUpdatePasswordRequest {
+        private String password;
+        private String newPassword;
     }
 }

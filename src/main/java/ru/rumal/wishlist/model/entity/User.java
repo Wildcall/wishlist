@@ -70,6 +70,10 @@ public class User implements BaseEntity, UserDetails {
             fetch = FetchType.LAZY)
     private Set<Tag> tags;
 
+    public User(String id) {
+        this.id = id;
+    }
+
     @Override
     public BaseDto toBaseDto() {
         return new UserDto(this.id,
@@ -93,7 +97,7 @@ public class User implements BaseEntity, UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email;
+        return this.id;
     }
 
     @Override

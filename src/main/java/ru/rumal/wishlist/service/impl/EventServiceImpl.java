@@ -10,6 +10,8 @@ import ru.rumal.wishlist.repository.BasicEventRepo;
 import ru.rumal.wishlist.repository.EventRepo;
 import ru.rumal.wishlist.service.CustomBeanUtils;
 import ru.rumal.wishlist.service.EventService;
+import ru.rumal.wishlist.repository.BasicEventRepo;
+import ru.rumal.wishlist.repository.EventRepo;
 
 import java.util.List;
 import java.util.Optional;

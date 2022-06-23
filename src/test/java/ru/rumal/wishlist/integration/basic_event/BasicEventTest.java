@@ -43,7 +43,7 @@ public class BasicEventTest {
     private BasicEventRepo basicEventRepo;
     @Autowired
     private MockMvc mockMvc;
-
+  
     @DisplayName("Pass if all endpoint is secure when not auth")
     @Test
     @Order(1)

@@ -58,6 +58,12 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public int getCountByUserId(String userId) {
+        return eventRepo.countByUserId(userId);
+    }
+
+    @Override
     public Optional<Event> findByIdAndUserId(Long id,
                                              String userId) {
         return eventRepo.findByIdAndUserId(id, userId);

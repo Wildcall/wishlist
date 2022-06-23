@@ -22,4 +22,6 @@ public interface TagService {
 
     Optional<Tag> findByIdAndUserId(Long tagId,
                                     String userId);
+
+    int getCountByUserId(String userId);
 }

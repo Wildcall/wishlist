@@ -10,7 +10,7 @@ public interface GiftFacade {
     BaseDto create(Principal principal,
                    GiftDto giftDto);
 
-    List<BaseDto> getAll(Principal principal);
+    List<BaseDto> getAllByUser(Principal principal);
 
     BaseDto update(Principal principal,
                    Long id,

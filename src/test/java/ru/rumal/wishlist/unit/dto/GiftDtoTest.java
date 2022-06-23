@@ -22,6 +22,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -49,6 +50,7 @@ class GiftDtoTest {
         requestView.put("picture", giftDto.getPicture());
         requestView.put("description", giftDto.getDescription());
         requestView.put("status", giftDto.getStatus());
+        requestView.put("eventsId", giftDto.getEventsId());
         requestView.put("tagId", giftDto.getTagId());
         return requestView;
     }
@@ -159,6 +161,7 @@ class GiftDtoTest {
                                       "link to gift picture",
                                       "description",
                                       GiftStatus.NEW.name(),
+                                      new HashSet<>(),
                                       22L);
 
         JsonContent<GiftDto> result = this.jacksonTester

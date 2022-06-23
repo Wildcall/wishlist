@@ -12,4 +12,6 @@ public interface TagRepo extends CrudRepository<Tag, Long> {
                                     String userId);
 
     List<Tag> findAllByUserId(String userId);
+
+    int countByUserId(String userId);
 }

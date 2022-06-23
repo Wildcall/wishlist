@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.rumal.wishlist.model.entity.Event;
 import ru.rumal.wishlist.model.entity.Gift;
 import ru.rumal.wishlist.repository.GiftRepo;
+import ru.rumal.wishlist.service.CustomBeanUtils;
 import ru.rumal.wishlist.service.GiftService;
 
 import java.util.List;
@@ -26,23 +26,33 @@ public class GiftServiceImpl implements GiftService {
     }
 
     @Override
-    public List<Gift> getAll(String userId) {
-        return giftRepo.findAllByUserId(userId);
+    public List<Gift> getAllByUserId(String userId) {
+        return giftRepo.getAllByUserId(userId);
     }
 
     @Override
     public boolean deleteByIdAndUserId(Long id,
                                        String userId) {
+        log.info("Try to delete gift! id: {} / userId: {}", id, userId);
         Optional<Gift> gift = findByIdAndUserId(id, userId);
         gift.ifPresent(giftRepo::delete);
         return gift.isPresent();
     }
 
     @Override
-    public Optional<Gift> updateByIdAndUserId(Long id,
-                                              String userId,
-                                              Event event) {
-        return Optional.empty();
+    public Optional<Gift> updateByIdAndUserId(Gift gift) {
+        Optional<Gift> optGift =
+                findByIdAndUserId(gift.getId(), gift.getUser().getId());
+        if (!optGift.isPresent())
+            return Optional.empty();
+        Gift existedGift = optGift.get();
+        CustomBeanUtils.copyProperties(gift, existedGift, "id", "user", "giversSet", "eventsSet");
+        return Optional.of(giftRepo.save(existedGift));
+    }
+
+    @Override
+    public int getCountByUserId(String userId) {
+        return giftRepo.countByUserId(userId);
     }
 
     public Optional<Gift> findByIdAndUserId(Long id,

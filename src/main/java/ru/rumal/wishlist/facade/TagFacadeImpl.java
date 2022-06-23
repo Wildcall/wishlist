@@ -2,6 +2,7 @@ package ru.rumal.wishlist.facade;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.exception.BadRequestException;
 import ru.rumal.wishlist.model.dto.BaseDto;
@@ -11,6 +12,7 @@ import ru.rumal.wishlist.model.entity.Tag;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.service.TagService;
 
+import javax.validation.constraints.Min;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,13 +23,20 @@ import java.util.stream.Collectors;
 public class TagFacadeImpl implements TagFacade {
 
     private final TagService tagService;
+    @Value("${limits.tag:10}")
+    @Min(1)
+    private int tagLimit;
 
     @Override
     public BaseDto create(Principal principal,
                           TagDto tagDto) {
-        String id = principal.getName();
+        String userId = principal.getName();
+
+        if (tagService.getCountByUserId(userId) >= tagLimit)
+            throw new BadRequestException("You can't create more then " + tagLimit + " tags");
+
         Tag tag = (Tag) tagDto.toBaseEntity();
-        tag.setUser(new User(id));
+        tag.setUser(new User(userId));
 
         return tagService
                 .save(tag)

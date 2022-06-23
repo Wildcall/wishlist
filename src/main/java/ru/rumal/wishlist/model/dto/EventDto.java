@@ -43,7 +43,6 @@ public class EventDto implements BaseDto {
     @JsonView(View.Response.class)
     private Set<Long> giftsSet;
 
-
     @Override
     public BaseEntity toBaseEntity() {
         Event event = new Event();

@@ -38,7 +38,7 @@ public class GiftController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(View.Response.class)
     public ResponseEntity<List<BaseDto>> getAll(Principal principal) {
-        List<BaseDto> response = giftFacade.getAll(principal);
+        List<BaseDto> response = giftFacade.getAllByUser(principal);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

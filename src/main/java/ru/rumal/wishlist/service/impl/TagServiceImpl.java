@@ -62,4 +62,9 @@ public class TagServiceImpl implements TagService {
                                            String userId) {
         return tagRepo.findByIdAndUserId(id, userId);
     }
+
+    @Override
+    public int getCountByUserId(String userId) {
+        return tagRepo.countByUserId(userId);
+    }
 }

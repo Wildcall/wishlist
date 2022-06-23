@@ -11,4 +11,6 @@ public interface EventRepo extends CrudRepository<Event, Long> {
 
     Optional<Event> findByIdAndUserId(Long id,
                                       String userId);
+
+    int countByUserId(String userId);
 }

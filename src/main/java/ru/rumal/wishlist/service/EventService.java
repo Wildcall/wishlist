@@ -19,4 +19,9 @@ public interface EventService {
                                         Event event);
 
     List<BasicEvent> getBasic();
+
+    int getCountByUserId(String userId);
+
+    Optional<Event> findByIdAndUserId(Long id,
+                                      String userId);
 }

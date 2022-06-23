@@ -8,8 +8,10 @@ import java.util.Optional;
 
 public interface GiftRepo extends CrudRepository<Gift, Long> {
 
-    List<Gift> findAllByUserId(String id);
+    List<Gift> getAllByUserId(String userId);
 
     Optional<Gift> findByIdAndUserId(Long id,
                                      String userId);
+
+    int countByUserId(String userId);
 }

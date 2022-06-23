@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -16,6 +17,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.service.UserExtractor;
 
 @Slf4j
@@ -46,10 +48,10 @@ public class WebSecurityConfig {
                         .antMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
                         .antMatchers(HttpMethod.GET, "/").permitAll()
                         .antMatchers(HttpMethod.GET, "/error").permitAll()
-                        .antMatchers("/v3/api-docs").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/user/registration").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/auth/logout").permitAll()
+                        .antMatchers("/api/v1/basic_event", "/api/v1/basic_event/*").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .maximumSessions(1)
@@ -85,5 +87,10 @@ public class WebSecurityConfig {
             userExtractor.extractAndSave(clientRegistrationId, oidcUser);
             return oidcUser;
         };
+    }
+
+    @Bean
+    public GrantedAuthorityDefaults grantedAuthorityDefaults() {
+        return new GrantedAuthorityDefaults("");
     }
 }

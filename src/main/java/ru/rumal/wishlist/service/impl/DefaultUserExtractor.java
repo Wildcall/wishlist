@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.model.entity.service.impl;
+package ru.rumal.wishlist.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.entity.User;
-import ru.rumal.wishlist.model.entity.service.UserExtractor;
-import ru.rumal.wishlist.model.entity.service.UserService;
+import ru.rumal.wishlist.service.UserExtractor;
+import ru.rumal.wishlist.service.UserService;
 
 @Slf4j
 @RequiredArgsConstructor

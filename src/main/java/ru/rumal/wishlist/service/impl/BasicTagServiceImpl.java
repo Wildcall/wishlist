@@ -1,11 +1,11 @@
-package ru.rumal.wishlist.model.entity.service.impl;
+package ru.rumal.wishlist.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.model.entity.BasicTag;
-import ru.rumal.wishlist.model.entity.service.BasicTagService;
+import ru.rumal.wishlist.service.BasicTagService;
 import ru.rumal.wishlist.repository.BasicTagRepo;
 
 import java.util.List;

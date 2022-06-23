@@ -9,7 +9,7 @@ import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.UserDto;
 import ru.rumal.wishlist.model.entity.User;
-import ru.rumal.wishlist.model.entity.service.UserService;
+import ru.rumal.wishlist.service.UserService;
 
 import java.security.Principal;
 

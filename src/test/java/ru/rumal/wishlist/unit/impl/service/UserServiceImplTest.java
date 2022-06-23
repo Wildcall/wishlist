@@ -5,9 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.rumal.wishlist.repository.UserRepo;
-import ru.rumal.wishlist.model.entity.service.AvatarService;
-import ru.rumal.wishlist.model.entity.service.UserService;
-import ru.rumal.wishlist.model.entity.service.impl.UserServiceImpl;
+import ru.rumal.wishlist.service.AvatarService;
+import ru.rumal.wishlist.service.UserService;
+import ru.rumal.wishlist.service.impl.UserServiceImpl;
 
 import java.util.HashSet;
 

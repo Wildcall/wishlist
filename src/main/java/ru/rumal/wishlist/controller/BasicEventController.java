@@ -13,7 +13,6 @@ import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.BasicEventDto;
 import ru.rumal.wishlist.model.dto.View;
 
-import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -36,7 +35,7 @@ public class BasicEventController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(View.Response.class)
-    public ResponseEntity<List<BaseDto>> getAll(Principal principal) {
+    public ResponseEntity<List<BaseDto>> getAll() {
         List<BaseDto> response = basicEventFacade.getAll();
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -44,8 +43,7 @@ public class BasicEventController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Long> delete(Principal principal,
-                                       @PathVariable Long id) {
+    public ResponseEntity<Long> delete(@PathVariable Long id) {
         Long response = basicEventFacade.delete(id);
 
         return ResponseEntity

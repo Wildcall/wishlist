@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.model.entity.service.impl;
+package ru.rumal.wishlist.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,8 +10,8 @@ import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.UserRepo;
-import ru.rumal.wishlist.model.entity.service.AvatarService;
-import ru.rumal.wishlist.model.entity.service.UserService;
+import ru.rumal.wishlist.service.AvatarService;
+import ru.rumal.wishlist.service.UserService;
 
 import java.util.Optional;
 import java.util.Random;

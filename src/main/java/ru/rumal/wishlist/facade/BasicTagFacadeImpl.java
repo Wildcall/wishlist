@@ -7,7 +7,7 @@ import ru.rumal.wishlist.exception.BadRequestException;
 import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.BasicTagDto;
 import ru.rumal.wishlist.model.entity.BasicTag;
-import ru.rumal.wishlist.model.entity.service.BasicTagService;
+import ru.rumal.wishlist.service.BasicTagService;
 
 import java.util.List;
 import java.util.stream.Collectors;

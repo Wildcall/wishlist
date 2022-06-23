@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.model.entity.service.impl;
+package ru.rumal.wishlist.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import ru.rumal.wishlist.model.entity.BasicTag;
 import ru.rumal.wishlist.model.entity.Tag;
 import ru.rumal.wishlist.repository.BasicTagRepo;
 import ru.rumal.wishlist.repository.TagRepo;
-import ru.rumal.wishlist.model.entity.service.TagService;
+import ru.rumal.wishlist.service.TagService;
 
 import java.util.List;
 import java.util.Optional;

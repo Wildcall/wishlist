@@ -10,7 +10,7 @@ import ru.rumal.wishlist.model.dto.TagDto;
 import ru.rumal.wishlist.model.entity.BasicTag;
 import ru.rumal.wishlist.model.entity.Tag;
 import ru.rumal.wishlist.model.entity.User;
-import ru.rumal.wishlist.model.entity.service.TagService;
+import ru.rumal.wishlist.service.TagService;
 
 import javax.validation.constraints.Min;
 import java.security.Principal;

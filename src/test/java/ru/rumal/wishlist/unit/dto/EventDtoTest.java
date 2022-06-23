@@ -130,6 +130,7 @@ class EventDtoTest {
         map = getCorrectUpdateViewMap();
         map.remove("date");
         String dateNotPresent = mapper.writeValueAsString(map);
+
         sb.add(Arguments.of(dateNotPresent, "date", true));
 
         map = getCorrectUpdateViewMap();

@@ -12,6 +12,7 @@ public interface EventFacade {
 
     List<BaseDto> getAllByUser(Principal principal);
 
+
     Long delete(Principal principal,
                 Long id);
 

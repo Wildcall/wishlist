@@ -84,6 +84,7 @@ public class GiftFacadeImpl implements GiftFacade {
 
     @Override
     public Long delete(Principal principal, Long id) {
+
         String userId = principal.getName();
 
         if (giftService.deleteByIdAndUserId(id, userId)) return id;

@@ -16,6 +16,7 @@ public interface EventService {
 
     Optional<Event> updateByIdAndUserId(Event event);
 
+
     List<BasicEvent> getBasic();
 
     int getCountByUserId(String userId);

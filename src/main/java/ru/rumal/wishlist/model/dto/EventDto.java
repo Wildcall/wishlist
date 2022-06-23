@@ -33,13 +33,12 @@ public class EventDto implements BaseDto {
     @JsonView(View.Response.class)
     private String description;
 
-    @NotNull(groups = {View.New.class, View.Update.class})
+    @NotNull(groups = {View.New.class})
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonView(View.Response.class)
     private LocalDateTime date;
 
     @Null(groups = {View.New.class})
-    @NotNull(groups = {View.Update.class})
     @JsonView(View.Response.class)
     private Set<Long> giftsSet;
 

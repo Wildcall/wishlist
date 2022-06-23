@@ -39,7 +39,8 @@ public class EventController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(View.Response.class)
     public ResponseEntity<List<BaseDto>> getAll(Principal principal) {
-        List<BaseDto> response = eventFacade.getAll(principal);
+        List<BaseDto> response = eventFacade.getAllByUser(principal);
+
 
         return ResponseEntity
                 .status(HttpStatus.OK)

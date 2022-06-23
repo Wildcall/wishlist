@@ -42,7 +42,9 @@ public class GiftServiceImpl implements GiftService {
     @Override
     public Optional<Gift> updateByIdAndUserId(Gift gift) {
         Optional<Gift> optGift =
-                findByIdAndUserId(gift.getId(), gift.getUser().getId());
+                findByIdAndUserId(gift.getId(), gift
+                        .getUser()
+                        .getId());
         if (!optGift.isPresent())
             return Optional.empty();
         Gift existedGift = optGift.get();
@@ -55,6 +57,7 @@ public class GiftServiceImpl implements GiftService {
         return giftRepo.countByUserId(userId);
     }
 
+    @Override
     public Optional<Gift> findByIdAndUserId(Long id,
                                             String userId) {
         return giftRepo.findByIdAndUserId(id, userId);

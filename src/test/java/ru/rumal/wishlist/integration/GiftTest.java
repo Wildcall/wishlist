@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -105,21 +106,27 @@ public class GiftTest {
     @Test
     @Order(3)
     public void createReturnGiftWithId() throws Exception {
+        giftFactory.clear();
         String name = "New gift";
 
         Map<String, String> giftMap = new HashMap<>();
         giftMap.put("name", name);
 
-        this.mockMvc
+        //  @formatter:off
+        Long id = resultActionUtils.extractLongId(this.mockMvc
                 .perform(HttpRequestBuilder.postJson("/api/v1/gift", giftMap))
                 .andDo(print())
-                .andExpectAll(status().isCreated(), content().contentType("application/json"), jsonPath("$.id", is(1)),
-                              jsonPath("$.name", is(name)), jsonPath("$.link").hasJsonPath(),
-                              jsonPath("$.picture").hasJsonPath(), jsonPath("$.description").hasJsonPath(),
-                              jsonPath("$.status", is(GiftStatus.NEW.name())), jsonPath("$.eventsId").isArray(),
-                              jsonPath("$.tagId").hasJsonPath());
-        //  @formatter:off
-        Gift gift = giftFactory.findById(1L);
+                .andExpectAll(status().isCreated(), content().contentType("application/json"),
+                              jsonPath("$.id").hasJsonPath(),
+                              jsonPath("$.name", is(name)),
+                              jsonPath("$.link").hasJsonPath(),
+                              jsonPath("$.picture").hasJsonPath(),
+                              jsonPath("$.description").hasJsonPath(),
+                              jsonPath("$.status", is(GiftStatus.NEW.name())),
+                              jsonPath("$.eventsId").isArray(),
+                              jsonPath("$.tagId").hasJsonPath()));
+
+        Gift gift = giftFactory.findById(id);
         Assertions.assertNotNull(gift);
         Assertions.assertEquals(gift.getUser().getId(), user.getId());
         Assertions.assertNull(gift.getTag());
@@ -304,6 +311,31 @@ public class GiftTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpectAll(isApiError("You can't create more then " + giftLimit + " gifts", "BAD_REQUEST"));
+        giftFactory.clear();
+    }
 
+    @DisplayName("Get all return list of gifts")
+    @WithMockAppUser
+    @Test
+    @Order(10)
+    public void getAllReturnListOfGift() throws Exception {
+        List<Gift> gifts = giftFactory.saveAll(giftFactory.generateRandomGift(5, user));
+
+        //  @formatter:off
+        this.mockMvc
+                .perform(HttpRequestBuilder.getJson("/api/v1/gift"))
+                .andDo(print())
+                .andExpectAll(status().isOk(),
+                              jsonPath("$.size()", is(gifts.size())),
+                              jsonPath("$[*].id", containsInAnyOrder(gifts.stream().map(g -> ((Number) g.getId()).intValue()).toArray())),
+                              jsonPath("$[*].name", containsInAnyOrder(gifts.stream().map(Gift::getName).toArray())),
+                              jsonPath("$[*].link", containsInAnyOrder(gifts.stream().map(Gift::getLink).toArray())),
+                              jsonPath("$[*].description", containsInAnyOrder(gifts.stream().map(Gift::getDescription).toArray())),
+                              jsonPath("$[*].picture", containsInAnyOrder(gifts.stream().map(Gift::getPicture).toArray())),
+                              jsonPath("$[*].status", containsInAnyOrder(gifts.stream().map(Gift::getStatus).map(GiftStatus::name).toArray())),
+                              jsonPath("$[*].tagId").hasJsonPath(),
+                              jsonPath("$[*].eventsId").hasJsonPath());
+        //  @formatter:on
+        giftFactory.clear();
     }
 }

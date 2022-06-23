@@ -1,7 +1,6 @@
 package ru.rumal.wishlist.integration;
 
 import lombok.RequiredArgsConstructor;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -13,23 +12,20 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.integration.context.WithMockAppUser;
-import ru.rumal.wishlist.integration.utils.HttpRequestBuilder;
-import ru.rumal.wishlist.integration.utils.ResultActionUtils;
-import ru.rumal.wishlist.integration.utils.TestEventFactory;
-import ru.rumal.wishlist.integration.utils.TestUserFactory;
+import ru.rumal.wishlist.integration.utils.*;
 import ru.rumal.wishlist.model.entity.Event;
+import ru.rumal.wishlist.model.entity.Gift;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.EventRepo;
 
 import javax.validation.constraints.Min;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -39,17 +35,18 @@ import static ru.rumal.wishlist.integration.utils.HttpResponseApiError.isApiErro
 @SpringBootTest
 @AutoConfigureMockMvc
 @RequiredArgsConstructor
-@Import({TestUserFactory.class, TestEventFactory.class, ResultActionUtils.class})
+@Import({TestUserFactory.class, TestEventFactory.class, TestGiftFactory.class, ResultActionUtils.class})
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Transactional
 public class EventTest {
 
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     //  @formatter:off
     @Autowired private TestUserFactory userFactory;
     @Autowired private TestEventFactory eventFactory;
+    @Autowired private TestGiftFactory giftFactory;
     @Autowired private EventRepo eventRepo;
     @Autowired private ResultActionUtils resultActionUtils;
     @Autowired private MockMvc mockMvc;
@@ -175,5 +172,105 @@ public class EventTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpectAll(isApiError("You can't create more then " + eventLimit + " events", "BAD_REQUEST"));
+    }
+
+    @DisplayName("Update event return updated event")
+    @WithMockAppUser
+    @Test
+    @Order(6)
+    public void updateReturnUpdatedEvent() throws Exception {
+        eventFactory.clear();
+        Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
+
+        String name = "Updated event";
+        String description = "Updated description";
+        String date = "2020-12-03 10:10";
+
+        Map<String, String> eventMap = new HashMap<>();
+        eventMap.put("name", name);
+
+        this.mockMvc
+                .perform(HttpRequestBuilder.putJson("/api/v1/event/" + event.getId(), eventMap))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpectAll(jsonPath("$.id", is(((Number) event.getId()).intValue())),
+                              jsonPath("$.name", is(name)),
+                              jsonPath("$.description", is(event.getDescription())),
+                              jsonPath("$.date", is(event
+                                                            .getDate()
+                                                            .format(formatter))),
+                              jsonPath("$.giftsSet", empty()));
+
+        eventMap.put("description", description);
+        eventMap.put("date", date);
+
+        this.mockMvc
+                .perform(HttpRequestBuilder.putJson("/api/v1/event/" + event.getId(), eventMap))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpectAll(jsonPath("$.id", is(((Number) event.getId()).intValue())),
+                              jsonPath("$.name", is(name)),
+                              jsonPath("$.description", is(description)),
+                              jsonPath("$.date", is(date)),
+                              jsonPath("$.giftsSet", empty()));
+
+        //  @formatter:off
+        Event updatedEvent = eventFactory.findById(event.getId());
+        Assertions.assertNotNull(updatedEvent);
+        Assertions.assertEquals(event.getId(), updatedEvent.getId());
+        Assertions.assertEquals(name, updatedEvent.getName());
+        Assertions.assertEquals(description, updatedEvent.getDescription());
+        Assertions.assertEquals(date, updatedEvent.getDate().format(formatter));
+        Assertions.assertEquals(user.getId(), updatedEvent.getUser().getId());
+        //  @formatter:on
+    }
+
+    @DisplayName("Update event return updated event with bind to gift list")
+    @WithMockAppUser
+    @Test
+    @Order(7)
+    public void updateReturnUpdatedEventWithGiftBind() throws Exception {
+        eventFactory.clear();
+        giftFactory.clear();
+
+        Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
+
+        Set<Gift> gifts = new HashSet<>(giftFactory
+                                                .saveAll(giftFactory.generateRandomGift(5, user)));
+
+        Set<Integer> giftsId = gifts
+                .stream()
+                .map(g -> ((Number) g.getId()).intValue())
+                .collect(Collectors.toSet());
+
+        String name = "Events with gifts";
+
+        Map<String, Object> eventMap = new HashMap<>();
+        eventMap.put("name", name);
+        eventMap.put("giftsSet", giftsId);
+
+        this.mockMvc
+                .perform(HttpRequestBuilder.putJson("/api/v1/event/" + event.getId(), eventMap))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpectAll(jsonPath("$.id", is(((Number) event.getId()).intValue())),
+                              jsonPath("$.name", is(name)),
+                              jsonPath("$.description", is(event.getDescription())),
+                              jsonPath("$.date", is(event
+                                                            .getDate()
+                                                            .format(formatter))),
+                              jsonPath("$.giftsSet", containsInAnyOrder(giftsId.toArray())));
+
+        giftsId.add(Integer.MAX_VALUE);
+
+        this.mockMvc
+                .perform(HttpRequestBuilder.putJson("/api/v1/event/" + event.getId(), eventMap))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpectAll(isApiError("Gift with id: '" + Integer.MAX_VALUE + "' not found", "BAD_REQUEST"));
+
+        Event updatedEvent = eventFactory.findById(event.getId());
+        Assertions.assertNotNull(updatedEvent);
+        Assertions.assertEquals(gifts, updatedEvent.getGifts());
     }
 }

@@ -43,8 +43,8 @@ public class BasicEventTest {
     private BasicEventRepo basicEventRepo;
     @Autowired
     private MockMvc mockMvc;
-
-    @DisplayName("Pass if all endpoint is secure")
+  
+    @DisplayName("Pass if all endpoint is secure when not auth")
     @Test
     @Order(1)
     public void checkApiSecure() {
@@ -63,10 +63,30 @@ public class BasicEventTest {
                 });
     }
 
-    @DisplayName("Return basic event")
-    @WithMockAppUser
+    @DisplayName("Pass if all endpoint is secure when role not ADMIN")
     @Test
+    @WithMockAppUser
     @Order(2)
+    public void checkApiSecureWhenUser() {
+        Stream
+                .of(get("/api/v1/basic_event"), post("/api/v1/basic_event"), delete("/api/v1/basic_event/1"))
+                .forEach(a -> {
+                    try {
+                        this.mockMvc
+                                .perform(a.with(csrf()))
+                                .andDo(print())
+                                .andExpect(status().isUnauthorized())
+                                .andExpectAll(isApiError("Access is denied", "UNAUTHORIZED"));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+    }
+
+    @DisplayName("Return basic event")
+    @WithMockAppUser(role = "ADMIN")
+    @Test
+    @Order(3)
     public void createReturnEvent() throws Exception {
 
         Map<String, String> eventMap = new HashMap<String, String>() {{
@@ -94,9 +114,9 @@ public class BasicEventTest {
     }
 
     @DisplayName("Return list of basic event")
-    @WithMockAppUser
+    @WithMockAppUser(role = "ADMIN")
     @Test
-    @Order(3)
+    @Order(4)
     public void getAllWhenExists() throws Exception {
         for (int i = 0; i < nameList.length; i++) {
             BasicEvent basicEvent = new BasicEvent(null,

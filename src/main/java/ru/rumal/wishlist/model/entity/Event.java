@@ -66,4 +66,8 @@ public class Event implements BaseEntity {
     public int hashCode() {
         return id.hashCode();
     }
+
+    public void addGift(Gift gift) {
+        this.gifts.add(gift);
+    }
 }

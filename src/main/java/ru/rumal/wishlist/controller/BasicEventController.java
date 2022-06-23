@@ -50,5 +50,4 @@ public class BasicEventController {
                 .status(HttpStatus.OK)
                 .body(response);
     }
-
 }

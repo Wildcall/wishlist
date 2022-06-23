@@ -37,9 +37,8 @@ public class TestEventFactory {
     public Event generateRandomEvent(User user) {
         Event event = new Event();
         event.setName(String.valueOf(random.nextInt(1000)));
-        event.setDate(LocalDateTime
-                              .now()
-                              .minusMinutes(random.nextInt(1000)));
+        event.setDate(LocalDateTime.now().minusMinutes(random.nextInt(1000)));
+        event.setDescription(String.valueOf(random.nextInt(1000)));
         event.setUser(user);
         return event;
     }
@@ -60,5 +59,9 @@ public class TestEventFactory {
         return eventRepo
                 .findById(id)
                 .orElse(null);
+    }
+
+    public void clear() {
+        eventRepo.deleteAll();
     }
 }

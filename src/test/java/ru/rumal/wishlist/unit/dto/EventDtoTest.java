@@ -123,19 +123,20 @@ class EventDtoTest {
         sb.add(Arguments.of(valid, null, true));
 
         map = getCorrectUpdateViewMap();
-        map.remove("name");
-        String nameNotPresent = mapper.writeValueAsString(map);
-        sb.add(Arguments.of(nameNotPresent, "name", false));
+        map.remove("giftsSet");
+        String giftsSetNotPresent = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(giftsSetNotPresent, "giftsSet", true));
 
         map = getCorrectUpdateViewMap();
         map.remove("date");
         String dateNotPresent = mapper.writeValueAsString(map);
-        sb.add(Arguments.of(dateNotPresent, "date", false));
+
+        sb.add(Arguments.of(dateNotPresent, "date", true));
 
         map = getCorrectUpdateViewMap();
-        map.remove("giftsSet");
-        String giftsSetNotPresent = mapper.writeValueAsString(map);
-        sb.add(Arguments.of(giftsSetNotPresent, "giftsSet", false));
+        map.remove("name");
+        String nameNotPresent = mapper.writeValueAsString(map);
+        sb.add(Arguments.of(nameNotPresent, "name", false));
 
         //  @formatter:off
         Stream.of("name", "description")

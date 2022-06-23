@@ -14,4 +14,6 @@ public @interface WithMockAppUser {
     String email() default "correct@user.com";
 
     String password() default "12345678";
+
+    String role() default "USER";
 }

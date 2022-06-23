@@ -14,9 +14,8 @@ public interface EventService {
     boolean deleteByIdAndUserId(Long id,
                                 String userId);
 
-    Optional<Event> updateByIdAndUserId(Long id,
-                                        String userId,
-                                        Event event);
+    Optional<Event> updateByIdAndUserId(Event event);
+
 
     List<BasicEvent> getBasic();
 

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -304,6 +305,31 @@ public class GiftTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpectAll(isApiError("You can't create more then " + giftLimit + " gifts", "BAD_REQUEST"));
+        giftFactory.clear();
+    }
 
+    @DisplayName("Get all return list of gifts")
+    @WithMockAppUser
+    @Test
+    @Order(10)
+    public void getAllReturnListOfGift() throws Exception {
+        List<Gift> gifts = giftFactory.saveAll(giftFactory.generateRandomGift(5, user));
+
+        //  @formatter:off
+        this.mockMvc
+                .perform(HttpRequestBuilder.getJson("/api/v1/gift"))
+                .andDo(print())
+                .andExpectAll(status().isOk(),
+                              jsonPath("$.size()", is(gifts.size())),
+                              jsonPath("$[*].id", containsInAnyOrder(gifts.stream().map(g -> ((Number) g.getId()).intValue()).toArray())),
+                              jsonPath("$[*].name", containsInAnyOrder(gifts.stream().map(Gift::getName).toArray())),
+                              jsonPath("$[*].link", containsInAnyOrder(gifts.stream().map(Gift::getLink).toArray())),
+                              jsonPath("$[*].description", containsInAnyOrder(gifts.stream().map(Gift::getDescription).toArray())),
+                              jsonPath("$[*].picture", containsInAnyOrder(gifts.stream().map(Gift::getPicture).toArray())),
+                              jsonPath("$[*].status", containsInAnyOrder(gifts.stream().map(Gift::getStatus).map(GiftStatus::name).toArray())),
+                              jsonPath("$[*].tagId").hasJsonPath(),
+                              jsonPath("$[*].eventsId").hasJsonPath());
+        //  @formatter:on
+        giftFactory.clear();
     }
 }

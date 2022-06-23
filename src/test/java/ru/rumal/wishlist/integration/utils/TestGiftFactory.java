@@ -62,4 +62,8 @@ public class TestGiftFactory {
                 .findById(id)
                 .orElse(null);
     }
+
+    public void clear() {
+        giftRepo.deleteAll();
+    }
 }

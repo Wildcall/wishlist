@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.entity.User;
@@ -17,6 +18,7 @@ import java.util.Random;
 
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -35,7 +37,18 @@ public class UserServiceImpl implements UserService {
         if (user.getAuthType() == null) user.setAuthType(AuthType.APPLICATION);
 
         if (user.getPicture() == null) user.setPicture(avatarService.generate(user));
+
         return Optional.of(userRepo.save(user));
+    }
+
+    @Override
+    public Optional<User> update(User user) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> findById(String id) {
+        return userRepo.findById(id);
     }
 
     @Override
@@ -51,9 +64,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean delete(User user) {
-        userRepo.delete(user);
-        return true;
+    public boolean existById(String id) {
+        return userRepo
+                .findById(id)
+                .isPresent();
+    }
+
+    @Override
+    public boolean delete(String id) {
+        Optional<User> user = userRepo.findById(id);
+        user.ifPresent(userRepo::delete);
+        return user.isPresent();
     }
 
     @Override

@@ -9,7 +9,9 @@ import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.GiftDto;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -34,16 +36,19 @@ public class Gift implements BaseEntity {
 
     @ToString.Exclude
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "givingGiftsSet")
-    private Set<User> giversSet;
+    private Set<User> giversSet = new HashSet<>();
 
     @ToString.Exclude
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "gifts")
-    private Set<Event> eventsSet;
+    private Set<Event> eventsSet = new HashSet<>();
 
     @ToString.Exclude
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "tag_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.EAGER)
     private Tag tag;
+
+    public boolean addEvent(Event event) {
+        return this.eventsSet.add(event);
+    }
 
     @Override
     public BaseDto toBaseDto() {
@@ -53,7 +58,26 @@ public class Gift implements BaseEntity {
                 this.link,
                 this.picture,
                 this.description,
-                this.status.name(),
-                this.tag.getId());
+                this.status != null ? this.status.name() : null,
+                this.eventsSet
+                        .stream()
+                        .map(Event::getId)
+                        .collect(Collectors.toSet()),
+                this.tag != null ? this.tag.getId() : null);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Gift gift = (Gift) o;
+
+        return id.equals(gift.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

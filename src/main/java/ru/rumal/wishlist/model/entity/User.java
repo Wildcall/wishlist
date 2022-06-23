@@ -15,6 +15,7 @@ import ru.rumal.wishlist.model.dto.UserDto;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,14 +46,14 @@ public class User implements BaseEntity, UserDetails {
             cascade = CascadeType.REMOVE,
             orphanRemoval = true,
             fetch = FetchType.LAZY)
-    private Set<Event> events;
+    private Set<Event> events = new HashSet<>();
 
     @ToString.Exclude
     @OneToMany(mappedBy = "user",
             cascade = CascadeType.REMOVE,
             orphanRemoval = true,
             fetch = FetchType.LAZY)
-    private Set<Gift> gifts;
+    private Set<Gift> gifts = new HashSet<>();
 
     @ToString.Exclude
     @ManyToMany(fetch = FetchType.LAZY)
@@ -61,14 +62,18 @@ public class User implements BaseEntity, UserDetails {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "gift_id")
     )
-    private Set<Gift> givingGiftsSet;
+    private Set<Gift> givingGiftsSet = new HashSet<>();
 
     @ToString.Exclude
     @OneToMany(mappedBy = "user",
             cascade = CascadeType.REMOVE,
             orphanRemoval = true,
             fetch = FetchType.LAZY)
-    private Set<Tag> tags;
+    private Set<Tag> tags = new HashSet<>();
+
+    public User(String id) {
+        this.id = id;
+    }
 
     @Override
     public BaseDto toBaseDto() {
@@ -93,7 +98,7 @@ public class User implements BaseEntity, UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email;
+        return this.id;
     }
 
     @Override

@@ -15,6 +15,7 @@ import ru.rumal.wishlist.model.dto.View;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -36,8 +37,8 @@ public class UserController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(View.Response.class)
-    public ResponseEntity<BaseDto> info() {
-        BaseDto response = userFacade.getInfo();
+    public ResponseEntity<BaseDto> info(Principal principal) {
+        BaseDto response = userFacade.getInfo(principal);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -45,8 +46,9 @@ public class UserController {
     }
 
     @DeleteMapping
-    public ResponseEntity<String> delete(HttpServletRequest request) throws ServletException {
-        String response = userFacade.delete();
+    public ResponseEntity<String> delete(Principal principal,
+                                         HttpServletRequest request) throws ServletException {
+        String response = userFacade.delete(principal);
         request.logout();
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -55,8 +57,20 @@ public class UserController {
 
     @PutMapping
     @JsonView(View.Response.class)
-    public ResponseEntity<BaseDto> update(@Validated(View.Update.class) @RequestBody UserDto userDto) {
-        BaseDto response = userFacade.updateInfo(userDto);
+    public ResponseEntity<BaseDto> updateInfo(Principal principal,
+                                          @Validated(View.Update.class) @RequestBody UserDto userDto) {
+        BaseDto response = userFacade.updateInfo(principal, userDto);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @PutMapping("/password")
+    @JsonView(View.Response.class)
+    public ResponseEntity<BaseDto> updatePassword(Principal principal,
+                                                  @Validated(View.UpdatePassword.class) @RequestBody UserDto userDto) {
+        BaseDto response = userFacade.updatePassword(principal, userDto);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

@@ -6,9 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class HttpRequestBuilder {
 
@@ -27,12 +25,18 @@ public class HttpRequestBuilder {
 
     @SneakyThrows
     public static MockHttpServletRequestBuilder putJson(String uri,
-                                                         Object o) {
+                                                        Object o) {
         String json = mapper.writeValueAsString(o);
         return put(uri)
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .content(json);
+    }
+
+    public static MockHttpServletRequestBuilder getJson(String uri) {
+        return get(uri)
+                .with(csrf())
+                .accept(MediaType.APPLICATION_JSON);
     }
 }

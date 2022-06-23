@@ -2,8 +2,6 @@ package ru.rumal.wishlist.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.model.AuthType;
@@ -35,24 +33,5 @@ public class DefaultUserExtractor implements UserExtractor {
 
             userService.save(user);
         }
-    }
-
-    @Override
-    public String extractEmail() {
-        Object principal = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-        if (principal
-                .getClass()
-                .equals(User.class)) {
-            return ((User) principal).getEmail();
-        }
-        if (principal
-                .getClass()
-                .equals(DefaultOidcUser.class)) {
-            return ((DefaultOidcUser) principal).getAttribute("email");
-        }
-        return null;
     }
 }

@@ -13,6 +13,7 @@ import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.GiftDto;
 import ru.rumal.wishlist.model.dto.View;
 
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -25,8 +26,9 @@ public class GiftController {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(View.Response.class)
-    public ResponseEntity<BaseDto> create(@Validated(View.New.class) @RequestBody GiftDto giftDto) {
-        BaseDto response = giftFacade.create(giftDto);
+    public ResponseEntity<BaseDto> create(Principal principal,
+                                          @Validated(View.New.class) @RequestBody GiftDto giftDto) {
+        BaseDto response = giftFacade.create(principal, giftDto);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -35,8 +37,8 @@ public class GiftController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(View.Response.class)
-    public ResponseEntity<List<BaseDto>> getAll() {
-        List<BaseDto> response = giftFacade.getAll();
+    public ResponseEntity<List<BaseDto>> getAll(Principal principal) {
+        List<BaseDto> response = giftFacade.getAllByUser(principal);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -45,9 +47,10 @@ public class GiftController {
 
     @PutMapping(path = "/{id}")
     @JsonView(View.Response.class)
-    public ResponseEntity<BaseDto> update(@PathVariable Long id,
+    public ResponseEntity<BaseDto> update(Principal principal,
+                                          @PathVariable Long id,
                                           @Validated(View.Update.class) @RequestBody GiftDto giftDto) {
-        BaseDto response = giftFacade.update(id, giftDto);
+        BaseDto response = giftFacade.update(principal, id, giftDto);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -55,8 +58,9 @@ public class GiftController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Long> delete(@PathVariable Long id) {
-        Long response = giftFacade.delete(id);
+    public ResponseEntity<Long> delete(Principal principal,
+                                       @PathVariable Long id) {
+        Long response = giftFacade.delete(principal, id);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

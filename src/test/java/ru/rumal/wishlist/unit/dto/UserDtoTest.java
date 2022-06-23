@@ -63,7 +63,6 @@ class UserDtoTest {
 
     private static Map<String, Object> getCorrectUpdateViewMap() {
         Map<String, Object> requestView = new HashMap<>();
-        requestView.put("id", "application-1234567891234567891212");
         requestView.put("email", "email@email.com");
         requestView.put("name", "name");
         return requestView;
@@ -71,7 +70,6 @@ class UserDtoTest {
 
     private static Map<String, Object> getCorrectUpdatePasswordViewMap() {
         Map<String, Object> requestView = new HashMap<>();
-        requestView.put("id", "application-1234567891234567891212");
         requestView.put("password", "password");
         requestView.put("newPassword", "newPassword");
         return requestView;
@@ -171,7 +169,7 @@ class UserDtoTest {
         sb.add(Arguments.of(wrongName, "name", false));
 
         //  @formatter:off
-        Stream.of("id", "email", "name")
+        Stream.of("email", "name")
                 .forEach(field -> Stream.of("", "  ", null)
                         .forEach(value -> {
                             try {
@@ -182,7 +180,7 @@ class UserDtoTest {
                             } catch (JsonProcessingException ignored) {}
                         }));
 
-        Stream.of("id", "email", "name")
+        Stream.of("email", "name")
                 .forEach(field -> {
                     try {
                         Map<String, Object> correctNewViewMap = getCorrectUpdateViewMap();
@@ -225,7 +223,7 @@ class UserDtoTest {
         sb.add(Arguments.of(longNewPassword, "newPassword", false));
 
         //  @formatter:off
-        Stream.of("id", "password", "newPassword")
+        Stream.of("password", "newPassword")
                 .forEach(field -> Stream.of("", "  ", null)
                         .forEach(value -> {
                             try {
@@ -236,7 +234,7 @@ class UserDtoTest {
                             } catch (JsonProcessingException ignored) {}
                         }));
 
-        Stream.of("id", "password", "newPassword")
+        Stream.of("password", "newPassword")
                 .forEach(field -> {
                     try {
                         Map<String, Object> correctNewViewMap = getCorrectUpdatePasswordViewMap();

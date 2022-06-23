@@ -3,6 +3,7 @@ package ru.rumal.wishlist.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.annotation.DeclareAnnotation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.EventDto;
 import ru.rumal.wishlist.model.dto.View;
 
+import java.security.Principal;
 import java.util.List;
 
 @Slf4j
@@ -25,8 +27,9 @@ public class EventController {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(View.Response.class)
-    public ResponseEntity<BaseDto> create(@Validated(View.New.class) @RequestBody EventDto eventDto) {
-        BaseDto response = eventFacade.create(eventDto);
+    public ResponseEntity<BaseDto> create(Principal principal,
+                                          @Validated(View.New.class) @RequestBody EventDto eventDto) {
+        BaseDto response = eventFacade.create(principal, eventDto);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -35,8 +38,18 @@ public class EventController {
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(View.Response.class)
-    public ResponseEntity<List<BaseDto>> getAll() {
-        List<BaseDto> response = eventFacade.getAll();
+    public ResponseEntity<List<BaseDto>> getAll(Principal principal) {
+        List<BaseDto> response = eventFacade.getAll(principal);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(response);
+    }
+
+    @GetMapping(path = "/basic", produces = MediaType.APPLICATION_JSON_VALUE)
+    @JsonView(View.Response.class)
+    public ResponseEntity<List<BaseDto>> getBasic() {
+        List<BaseDto> response = eventFacade.getBasic();
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -45,9 +58,10 @@ public class EventController {
 
     @PutMapping(path = "/{id}")
     @JsonView(View.Response.class)
-    public ResponseEntity<BaseDto> update(@PathVariable Long id,
+    public ResponseEntity<BaseDto> update(Principal principal,
+                                          @PathVariable Long id,
                                           @Validated(View.Update.class) @RequestBody EventDto eventDto) {
-        BaseDto response = eventFacade.update(id, eventDto);
+        BaseDto response = eventFacade.update(principal, id, eventDto);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -55,8 +69,9 @@ public class EventController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public ResponseEntity<Long> delete(@PathVariable Long id) {
-        Long response = eventFacade.delete(id);
+    public ResponseEntity<Long> delete(Principal principal,
+                                       @PathVariable Long id) {
+        Long response = eventFacade.delete(principal, id);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

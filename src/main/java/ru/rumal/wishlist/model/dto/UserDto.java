@@ -21,8 +21,7 @@ import javax.validation.constraints.Pattern;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserDto implements BaseDto {
 
-    @Null(groups = {View.New.class})
-    @CustomString(groups = {View.Update.class, View.UpdatePassword.class})
+    @Null(groups = {View.New.class, View.Update.class, View.UpdatePassword.class})
     @JsonView(View.Response.class)
     private String id;
 

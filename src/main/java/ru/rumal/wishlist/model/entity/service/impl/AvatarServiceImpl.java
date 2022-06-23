@@ -1,8 +1,8 @@
-package ru.rumal.wishlist.service.impl;
+package ru.rumal.wishlist.model.entity.service.impl;
 
 import org.springframework.stereotype.Service;
 import ru.rumal.wishlist.model.entity.User;
-import ru.rumal.wishlist.service.AvatarService;
+import ru.rumal.wishlist.model.entity.service.AvatarService;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

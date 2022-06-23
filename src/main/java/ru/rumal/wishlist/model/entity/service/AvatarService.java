@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.service;
+package ru.rumal.wishlist.model.entity.service;
 
 import ru.rumal.wishlist.model.entity.User;
 

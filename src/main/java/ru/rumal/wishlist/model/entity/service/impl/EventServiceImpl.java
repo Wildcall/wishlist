@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.service.impl;
+package ru.rumal.wishlist.model.entity.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.model.entity.BasicEvent;
 import ru.rumal.wishlist.model.entity.Event;
+import ru.rumal.wishlist.model.entity.service.EventService;
 import ru.rumal.wishlist.repository.BasicEventRepo;
 import ru.rumal.wishlist.repository.EventRepo;
-import ru.rumal.wishlist.service.EventService;
 
 import java.util.List;
 import java.util.Optional;

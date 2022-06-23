@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.service;
+package ru.rumal.wishlist.model.entity.service;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 import ru.rumal.wishlist.model.entity.User;

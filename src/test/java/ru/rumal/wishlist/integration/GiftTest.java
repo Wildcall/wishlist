@@ -106,21 +106,27 @@ public class GiftTest {
     @Test
     @Order(3)
     public void createReturnGiftWithId() throws Exception {
+        giftFactory.clear();
         String name = "New gift";
 
         Map<String, String> giftMap = new HashMap<>();
         giftMap.put("name", name);
 
-        this.mockMvc
+        //  @formatter:off
+        Long id = resultActionUtils.extractLongId(this.mockMvc
                 .perform(HttpRequestBuilder.postJson("/api/v1/gift", giftMap))
                 .andDo(print())
-                .andExpectAll(status().isCreated(), content().contentType("application/json"), jsonPath("$.id", is(1)),
-                              jsonPath("$.name", is(name)), jsonPath("$.link").hasJsonPath(),
-                              jsonPath("$.picture").hasJsonPath(), jsonPath("$.description").hasJsonPath(),
-                              jsonPath("$.status", is(GiftStatus.NEW.name())), jsonPath("$.eventsId").isArray(),
-                              jsonPath("$.tagId").hasJsonPath());
-        //  @formatter:off
-        Gift gift = giftFactory.findById(1L);
+                .andExpectAll(status().isCreated(), content().contentType("application/json"),
+                              jsonPath("$.id").hasJsonPath(),
+                              jsonPath("$.name", is(name)),
+                              jsonPath("$.link").hasJsonPath(),
+                              jsonPath("$.picture").hasJsonPath(),
+                              jsonPath("$.description").hasJsonPath(),
+                              jsonPath("$.status", is(GiftStatus.NEW.name())),
+                              jsonPath("$.eventsId").isArray(),
+                              jsonPath("$.tagId").hasJsonPath()));
+
+        Gift gift = giftFactory.findById(id);
         Assertions.assertNotNull(gift);
         Assertions.assertEquals(gift.getUser().getId(), user.getId());
         Assertions.assertNull(gift.getTag());

@@ -3,7 +3,6 @@ package ru.rumal.wishlist.controller;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.annotation.DeclareAnnotation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +38,7 @@ public class EventController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     @JsonView(View.Response.class)
     public ResponseEntity<List<BaseDto>> getAll(Principal principal) {
-        List<BaseDto> response = eventFacade.getAll(principal);
+        List<BaseDto> response = eventFacade.getAllByUser(principal);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

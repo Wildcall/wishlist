@@ -10,7 +10,7 @@ public interface EventFacade {
     BaseDto create(Principal principal,
                    EventDto eventDto);
 
-    List<BaseDto> getAll(Principal principal);
+    List<BaseDto> getAllByUser(Principal principal);
 
     Long delete(Principal principal,
                 Long id);

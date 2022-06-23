@@ -16,4 +16,7 @@ public interface GiftService {
     Optional<Gift> updateByIdAndUserId(Gift gift);
 
     int getCountByUserId(String userId);
+
+    Optional<Gift> findByIdAndUserId(Long giftId,
+                                     String userId);
 }

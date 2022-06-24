@@ -36,6 +36,7 @@ logging:
       springframework:
         web: INFO
 
+secret: ${SECRET}
 limits:
   event: 20
   tag: 10

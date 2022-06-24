@@ -13,8 +13,6 @@ public interface GiftService {
     boolean deleteByIdAndUserId(Long id,
                                 String userId);
 
-    Optional<Gift> updateByIdAndUserId(Gift gift);
-
     int getCountByUserId(String userId);
 
     Optional<Gift> findByIdAndUserId(Long giftId,

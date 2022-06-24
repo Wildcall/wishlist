@@ -36,8 +36,8 @@ public class TestEventFactory {
 
     public Event generateRandomEvent(User user) {
         Event event = new Event();
-        event.setName(String.valueOf(random.nextInt(1000)));
-        event.setDate(LocalDateTime.now().minusMinutes(random.nextInt(1000)));
+        event.setName("Event-" + random.nextInt(1000));
+        event.setDate(LocalDateTime.now().plusDays(random.nextInt(100)));
         event.setDescription(String.valueOf(random.nextInt(1000)));
         event.setUser(user);
         return event;

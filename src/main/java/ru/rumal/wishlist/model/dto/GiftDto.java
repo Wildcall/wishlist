@@ -7,13 +7,11 @@ import lombok.NoArgsConstructor;
 import ru.rumal.wishlist.model.GiftStatus;
 import ru.rumal.wishlist.model.entity.BaseEntity;
 import ru.rumal.wishlist.model.entity.Gift;
-import ru.rumal.wishlist.model.entity.Tag;
 import ru.rumal.wishlist.validation.CustomEnum;
 import ru.rumal.wishlist.validation.CustomLong;
 import ru.rumal.wishlist.validation.CustomString;
 
 import javax.validation.constraints.Null;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -49,9 +47,6 @@ public class GiftDto implements BaseDto {
     @JsonView(View.Private.class)
     private Long eventId;
 
-    @JsonView(View.Response.class)
-    private Set<Long> eventsId;
-
     @CustomLong(groups = {View.New.class, View.Update.class}, min = 0, nullable = true)
     @JsonView(View.Response.class)
     private Long tagId;
@@ -62,7 +57,6 @@ public class GiftDto implements BaseDto {
                    String picture,
                    String description,
                    String status,
-                   Set<Long> eventsId,
                    Long tagId) {
         this.id = id;
         this.name = name;
@@ -70,20 +64,17 @@ public class GiftDto implements BaseDto {
         this.picture = picture;
         this.description = description;
         this.status = status;
-        this.eventsId = eventsId;
         this.tagId = tagId;
     }
 
     @Override
     public BaseEntity toBaseEntity() {
         Gift gift = new Gift();
-        gift.setId(this.id);
         gift.setName(this.name);
         gift.setLink(this.link);
         gift.setPicture(this.picture);
         gift.setDescription(this.description);
         gift.setStatus(status != null ? GiftStatus.valueOf(status) : null);
-        gift.setTag(tagId != null ? new Tag(this.tagId) : null);
         return gift;
     }
 }

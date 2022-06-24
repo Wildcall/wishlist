@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.exception.BadRequestException;
 import ru.rumal.wishlist.model.GiftStatus;
 import ru.rumal.wishlist.model.dto.BaseDto;
@@ -12,6 +13,7 @@ import ru.rumal.wishlist.model.entity.Event;
 import ru.rumal.wishlist.model.entity.Gift;
 import ru.rumal.wishlist.model.entity.Tag;
 import ru.rumal.wishlist.model.entity.User;
+import ru.rumal.wishlist.service.CustomBeanUtils;
 import ru.rumal.wishlist.service.EventService;
 import ru.rumal.wishlist.service.GiftService;
 import ru.rumal.wishlist.service.TagService;
@@ -44,72 +46,68 @@ public class GiftFacadeImpl implements GiftFacade {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public BaseDto create(Principal principal,
                           GiftDto giftDto) {
         String userId = principal.getName();
 
-        if (giftService.getCountByUserId(userId) >= giftLimit)
-            throw new BadRequestException("You can't create more then " + giftLimit + " gifts");
+        if (giftService.getCountByUserId(userId) >= giftLimit) throw new BadRequestException(
+                "You can't create more then " + giftLimit + " gifts");
 
         Gift gift = (Gift) giftDto.toBaseEntity();
         gift.setUser(new User(userId));
         gift.setStatus(GiftStatus.NEW);
+        gift.setTag(checkTagAvailable(giftDto.getTagId(), userId));
+        Gift savedGift = giftService.save(gift);
 
-        checkEventAvailable(giftDto.getEventId(), userId, gift);
-        checkTagAvailable(giftDto.getTagId(), userId, gift);
-
-        return giftService
-                .save(gift)
-                .toBaseDto();
-    }
-
-    @Override
-    public BaseDto update(Principal principal,
-                          Long id,
-                          GiftDto giftDto) {
-        String userId = principal.getName();
-        Gift gift = (Gift) giftDto.toBaseEntity();
-
-        gift.setId(id);
-        gift.setUser(new User(userId));
-
-        checkTagAvailable(giftDto.getTagId(), userId, gift);
-
-        return giftService
-                .updateByIdAndUserId(gift)
-                .orElseThrow(() -> new BadRequestException("Gift not found"))
-                .toBaseDto();
-    }
-
-    @Override
-    public Long delete(Principal principal, Long id) {
-
-        String userId = principal.getName();
-
-        if (giftService.deleteByIdAndUserId(id, userId)) return id;
-        throw new BadRequestException("Gift not found");
-    }
-
-    private void checkTagAvailable(Long tagId,
-                                   String userId,
-                                   Gift gift) {
-        if (tagId != null) {
-            Tag tag = tagService
-                    .findByIdAndUserId(tagId, userId)
-                    .orElseThrow(() -> new BadRequestException("Tag with id: '" + tagId + "' not found"));
-            gift.setTag(tag);
-        }
-    }
-
-    private void checkEventAvailable(Long eventId,
-                                     String userId,
-                                     Gift gift) {
+        Long eventId = giftDto.getEventId();
         if (eventId != null) {
             Event event = eventService
                     .findByIdAndUserId(eventId, userId)
-                    .orElseThrow(() -> new BadRequestException("Event with id: '" + eventId + "' not found"));
-            gift.addEvent(event);
+                    .orElseThrow(() -> new BadRequestException("Event with id '" + eventId + "' not found!"));
+            event.addGift(savedGift);
         }
+
+        return savedGift.toBaseDto();
+    }
+
+    @Transactional
+    @Override
+    public BaseDto update(Principal principal,
+                          Long giftId,
+                          GiftDto giftDto) {
+        String userId = principal.getName();
+        Gift existedGift = giftService
+                .findByIdAndUserId(giftId, userId)
+                .orElseThrow(() -> new BadRequestException("Gift with id '" + giftId + "' not found"));
+
+        Gift gift = (Gift) giftDto.toBaseEntity();
+        gift.setTag(checkTagAvailable(giftDto.getTagId(), userId));
+
+        CustomBeanUtils.copyProperties(gift, existedGift, "id", "user", "giversSet", "eventsSet");
+
+        return giftService
+                .save(existedGift)
+                .toBaseDto();
+    }
+
+    @Override
+    public Long delete(Principal principal,
+                       Long giftId) {
+        String userId = principal.getName();
+
+        if (giftService.deleteByIdAndUserId(giftId, userId)) return giftId;
+        throw new BadRequestException("Gift with id '" + giftId + "' not found");
+    }
+
+    private Tag checkTagAvailable(Long tagId,
+                                  String userId) {
+        if (tagId != null) {
+            return tagService
+                    .findByIdAndUserId(tagId, userId)
+                    .orElseThrow(() -> new BadRequestException("Tag with id: '" + tagId + "' not found"));
+        }
+        return null;
     }
 }

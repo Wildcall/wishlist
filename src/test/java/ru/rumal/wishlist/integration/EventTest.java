@@ -20,12 +20,14 @@ import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.EventRepo;
 
 import javax.validation.constraints.Min;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -38,7 +40,6 @@ import static ru.rumal.wishlist.integration.utils.HttpResponseApiError.isApiErro
 @Import({TestUserFactory.class, TestEventFactory.class, TestGiftFactory.class, ResultActionUtils.class})
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EventTest {
 
@@ -66,9 +67,14 @@ public class EventTest {
         userFactory.clear(user.getId());
     }
 
+    @BeforeEach
+    public void eachSetup() {
+        eventFactory.clear();
+        giftFactory.clear();
+    }
+
     @DisplayName("Pass if all endpoint is secure")
     @Test
-    @Order(1)
     public void checkApiSecure() {
         Stream
                 .of(get("/api/v1/event"), post("/api/v1/event"), put("/api/v1/event/1"), delete("/api/v1/event/1"))
@@ -85,22 +91,9 @@ public class EventTest {
                 });
     }
 
-    @DisplayName("Delete return api error if event with expected id not found")
-    @WithMockAppUser
-    @Test
-    @Order(2)
-    public void deleteReturnApiError() throws Exception {
-        this.mockMvc
-                .perform(delete("/api/v1/event/" + 1).with(csrf()))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpectAll(isApiError("Event not found", "BAD_REQUEST"));
-    }
-
     @DisplayName("Create return event with id")
     @WithMockAppUser
     @Test
-    @Order(3)
     public void createReturnEventWithId() throws Exception {
         String name = "New event";
         String date = "2022-06-29 10:00";
@@ -124,38 +117,43 @@ public class EventTest {
                                       jsonPath("$.description", is(description)),
                                       jsonPath("$.giftsSet").hasJsonPath()));
 
-        Event event = eventFactory.findById(id);
-        Assertions.assertNotNull(event);
-        Assertions.assertEquals(event.getUser().getId(), user.getId());
-        Assertions.assertTrue(event.getGifts().isEmpty());
+        compareEvents(id,
+                      user.getId(),
+                      name,
+                      description,
+                      date);
         //  @formatter:on
     }
 
-    @DisplayName("Delete return event id when success")
+    @DisplayName("Create return error if date in past")
     @WithMockAppUser
     @Test
-    @Order(4)
-    public void deleteReturnLong() throws Exception {
+    public void createReturnErrorWhenDateInPast() throws Exception {
+        String name = "New event";
+        String date = LocalDateTime
+                .now()
+                .minusDays(1)
+                .format(formatter);
+        String description = "description";
 
-        Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
+        Map<String, String> eventMap = new HashMap<>();
+        eventMap.put("name", name);
+        eventMap.put("date", date);
+        eventMap.put("description", description);
 
+        //  @formatter:off
         this.mockMvc
-                .perform(delete("/api/v1/event/" + event.getId()).with(csrf()))
+                .perform(HttpRequestBuilder.postJson("/api/v1/event", eventMap))
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpectAll(content().contentType(MediaType.APPLICATION_JSON),
-                              content().string(String.valueOf(event.getId())));
-
-        Assertions.assertNotNull(event.getId());
-        Optional<Event> id = eventRepo.findById(event.getId());
-        Assertions.assertFalse(id.isPresent());
+                .andExpect(status().isBadRequest())
+                .andExpectAll(isApiError("Date of event must be in future", "BAD_REQUEST"));
+        //  @formatter:on
     }
 
     @DisplayName("Create return api error when try to create more then ${limits.event} events")
     @WithMockAppUser
     @Test
-    @Order(5)
-    public void createReturnApiErrorWhenEventsCountMoreThenLimit() throws Exception {
+    public void createReturnErrorWhenEventsCountMoreThenLimit() throws Exception {
         eventFactory.saveAll(eventFactory.generateRandomEvent(20, user));
 
         String name = "New event";
@@ -177,18 +175,48 @@ public class EventTest {
     @DisplayName("Update event return updated event")
     @WithMockAppUser
     @Test
-    @Order(6)
     public void updateReturnUpdatedEvent() throws Exception {
-        eventFactory.clear();
         Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
 
         String name = "Updated event";
         String description = "Updated description";
-        String date = "2020-12-03 10:10";
+        String date = LocalDateTime
+                .now()
+                .plusDays(1)
+                .format(formatter);
 
         Map<String, String> eventMap = new HashMap<>();
         eventMap.put("name", name);
+        eventMap.put("description", description);
+        eventMap.put("date", date);
+        //  @formatter:off
+        this.mockMvc
+                .perform(HttpRequestBuilder.putJson("/api/v1/event/" + event.getId(), eventMap))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpectAll(jsonPath("$.id", is(((Number) event.getId()).intValue())), jsonPath("$.name", is(name)),
+                              jsonPath("$.description", is(description)), jsonPath("$.date", is(date)),
+                              jsonPath("$.giftsSet", empty()));
 
+
+        compareEvents(event.getId(),
+                      user.getId(),
+                      name,
+                      description,
+                      date);
+        //  @formatter:on
+    }
+
+    @DisplayName("Update does not change fields that are not set")
+    @WithMockAppUser
+    @Test
+    public void updateNotChangeNotSetFields() throws Exception {
+        Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
+        Map<String, String> eventMap = new HashMap<>();
+
+        //  @formatter:off
+        String name = "Updated event";
+        eventMap.put("name", name);
         this.mockMvc
                 .perform(HttpRequestBuilder.putJson("/api/v1/event/" + event.getId(), eventMap))
                 .andDo(print())
@@ -201,9 +229,25 @@ public class EventTest {
                                                             .format(formatter))),
                               jsonPath("$.giftsSet", empty()));
 
+        String description = "Updated description";
         eventMap.put("description", description);
-        eventMap.put("date", date);
+        this.mockMvc
+                .perform(HttpRequestBuilder.putJson("/api/v1/event/" + event.getId(), eventMap))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpectAll(jsonPath("$.id", is(((Number) event.getId()).intValue())),
+                              jsonPath("$.name", is(name)),
+                              jsonPath("$.description", is(description)),
+                              jsonPath("$.date", is(event
+                                                            .getDate()
+                                                            .format(formatter))),
+                              jsonPath("$.giftsSet", empty()));
 
+        String date = LocalDateTime
+                .now()
+                .plusDays(1)
+                .format(formatter);
+        eventMap.put("date", date);
         this.mockMvc
                 .perform(HttpRequestBuilder.putJson("/api/v1/event/" + event.getId(), eventMap))
                 .andDo(print())
@@ -214,29 +258,21 @@ public class EventTest {
                               jsonPath("$.date", is(date)),
                               jsonPath("$.giftsSet", empty()));
 
-        //  @formatter:off
-        Event updatedEvent = eventFactory.findById(event.getId());
-        Assertions.assertNotNull(updatedEvent);
-        Assertions.assertEquals(event.getId(), updatedEvent.getId());
-        Assertions.assertEquals(name, updatedEvent.getName());
-        Assertions.assertEquals(description, updatedEvent.getDescription());
-        Assertions.assertEquals(date, updatedEvent.getDate().format(formatter));
-        Assertions.assertEquals(user.getId(), updatedEvent.getUser().getId());
+        compareEvents(event.getId(),
+                      user.getId(),
+                      name,
+                      description,
+                      date);
         //  @formatter:on
     }
 
     @DisplayName("Update event return updated event with bind to gift list")
     @WithMockAppUser
     @Test
-    @Order(7)
     public void updateReturnUpdatedEventWithGiftBind() throws Exception {
-        eventFactory.clear();
-        giftFactory.clear();
-
         Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
 
-        Set<Gift> gifts = new HashSet<>(giftFactory
-                                                .saveAll(giftFactory.generateRandomGift(5, user)));
+        Set<Gift> gifts = new HashSet<>(giftFactory.saveAll(giftFactory.generateRandomGift(5, user)));
 
         Set<Integer> giftsId = gifts
                 .stream()
@@ -247,19 +283,17 @@ public class EventTest {
 
         Map<String, Object> eventMap = new HashMap<>();
         eventMap.put("name", name);
-        eventMap.put("giftsSet", giftsId);
+        eventMap.put("giftsIdSet", giftsId);
 
         this.mockMvc
                 .perform(HttpRequestBuilder.putJson("/api/v1/event/" + event.getId(), eventMap))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpectAll(jsonPath("$.id", is(((Number) event.getId()).intValue())),
-                              jsonPath("$.name", is(name)),
-                              jsonPath("$.description", is(event.getDescription())),
-                              jsonPath("$.date", is(event
-                                                            .getDate()
-                                                            .format(formatter))),
-                              jsonPath("$.giftsSet", containsInAnyOrder(giftsId.toArray())));
+                .andExpectAll(jsonPath("$.id", is(((Number) event.getId()).intValue())), jsonPath("$.name", is(name)),
+                              jsonPath("$.description", is(event.getDescription())), jsonPath("$.date", is(event
+                                                                                                                   .getDate()
+                                                                                                                   .format(formatter))),
+                              jsonPath("$.giftsSet.size()", is(gifts.size())));
 
         giftsId.add(Integer.MAX_VALUE);
 
@@ -272,5 +306,78 @@ public class EventTest {
         Event updatedEvent = eventFactory.findById(event.getId());
         Assertions.assertNotNull(updatedEvent);
         Assertions.assertEquals(gifts, updatedEvent.getGifts());
+    }
+
+    @DisplayName("Update return error if date in past")
+    @WithMockAppUser
+    @Test
+    public void updateReturnErrorWhenDateInPast() throws Exception {
+        Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
+        String name = "New event";
+        String date = LocalDateTime
+                .now()
+                .minusDays(1)
+                .format(formatter);
+
+        Map<String, String> eventMap = new HashMap<>();
+        eventMap.put("name", name);
+        eventMap.put("date", date);
+
+        //  @formatter:off
+        this.mockMvc
+                .perform(HttpRequestBuilder.putJson("/api/v1/event/" + event.getId(), eventMap))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpectAll(isApiError("Date of event must be in future", "BAD_REQUEST"));
+        //  @formatter:on
+    }
+
+    @DisplayName("Delete return event id when success")
+    @WithMockAppUser
+    @Test
+    public void deleteReturnLong() throws Exception {
+
+        Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
+
+        this.mockMvc
+                .perform(delete("/api/v1/event/" + event.getId()).with(csrf()))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpectAll(content().contentType(MediaType.APPLICATION_JSON),
+                              content().string(String.valueOf(event.getId())));
+
+        Assertions.assertNotNull(event.getId());
+        Optional<Event> id = eventRepo.findById(event.getId());
+        Assertions.assertFalse(id.isPresent());
+    }
+
+    @DisplayName("Delete return error if event not found")
+    @WithMockAppUser
+    @Test
+    public void deleteReturnErrorWhenEventNotFound() throws Exception {
+        this.mockMvc
+                .perform(delete("/api/v1/event/" + 1).with(csrf()))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpectAll(isApiError("Event with id '" + 1 + "' not found!", "BAD_REQUEST"));
+    }
+
+    private void compareEvents(Long eventId,
+                               String userId,
+                               String name,
+                               String description,
+                               String date) {
+        Event existedEvent = eventFactory.findById(eventId);
+
+        Assertions.assertNotNull(existedEvent);
+        Assertions.assertEquals(eventId, existedEvent.getId());
+        if (name != null) Assertions.assertEquals(name, existedEvent.getName());
+        if (description != null) Assertions.assertEquals(description, existedEvent.getDescription());
+        if (date != null) Assertions.assertEquals(date, existedEvent
+                .getDate()
+                .format(formatter));
+        if (userId != null) Assertions.assertEquals(userId, existedEvent
+                .getUser()
+                .getId());
     }
 }

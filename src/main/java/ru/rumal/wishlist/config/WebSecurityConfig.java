@@ -45,13 +45,11 @@ public class WebSecurityConfig {
                 .httpBasic().disable()
                 .authorizeRequests(r -> r
                         .antMatchers("/js/*", "/assets/*").permitAll()
-                        .antMatchers(HttpMethod.GET, "/favicon.ico").permitAll()
-                        .antMatchers(HttpMethod.GET, "/").permitAll()
-                        .antMatchers(HttpMethod.GET, "/error").permitAll()
-                        .antMatchers("/v3/api-docs").permitAll()
+                        .antMatchers(HttpMethod.GET, "/", "/error", "/favicon.ico").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/user/registration").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/auth/logout").permitAll()
+                        .antMatchers(HttpMethod.GET, "/api/v1/reserved/gift", "/api/v1/reserved/event").permitAll()
                         .antMatchers("/api/v1/basic_event", "/api/v1/basic_event/*").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session

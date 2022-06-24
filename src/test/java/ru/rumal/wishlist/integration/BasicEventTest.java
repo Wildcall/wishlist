@@ -1,4 +1,4 @@
-package ru.rumal.wishlist.integration.basic_event;
+package ru.rumal.wishlist.integration;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.*;

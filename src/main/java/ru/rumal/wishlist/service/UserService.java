@@ -12,11 +12,7 @@ public interface UserService extends UserDetailsService {
 
     Optional<User> findById(String id);
 
-    Optional<User> findByEmail(String email);
-
     boolean existByEmail(String email);
-
-    boolean existById(String id);
 
     boolean delete(String id);
 

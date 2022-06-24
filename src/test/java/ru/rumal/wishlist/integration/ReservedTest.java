@@ -17,13 +17,17 @@ import ru.rumal.wishlist.integration.utils.ResultActionUtils;
 import ru.rumal.wishlist.integration.utils.TestEventFactory;
 import ru.rumal.wishlist.integration.utils.TestGiftFactory;
 import ru.rumal.wishlist.integration.utils.TestUserFactory;
+import ru.rumal.wishlist.model.GiftStatus;
 import ru.rumal.wishlist.model.entity.Event;
 import ru.rumal.wishlist.model.entity.Gift;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.service.JwtUtils;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.*;
@@ -32,7 +36,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static ru.rumal.wishlist.integration.utils.HttpRequestBuilder.*;
+import static ru.rumal.wishlist.integration.utils.HttpRequestBuilder.getJson;
+import static ru.rumal.wishlist.integration.utils.HttpRequestBuilder.postJson;
 import static ru.rumal.wishlist.integration.utils.HttpResponseApiError.isApiError;
 
 @Slf4j
@@ -46,6 +51,7 @@ import static ru.rumal.wishlist.integration.utils.HttpResponseApiError.isApiErro
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class ReservedTest {
 
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     //  @formatter:off
     @Autowired private TestUserFactory userFactory;
     @Autowired private TestGiftFactory giftFactory;
@@ -65,9 +71,14 @@ public class ReservedTest {
         userFactory.clear(user.getId());
     }
 
+    @BeforeEach
+    public void eachSetup() {
+        eventFactory.clear();
+        giftFactory.clear();
+    }
+
     @DisplayName("Pass if all endpoint is secure")
     @Test
-    @Order(1)
     public void checkApiSecure() {
         Stream
                 .of(get("/api/v1/reserved/link"), put("/api/v1/reserved/gift"))
@@ -87,13 +98,12 @@ public class ReservedTest {
     @DisplayName("Generate correct link")
     @WithMockAppUser
     @Test
-    @Order(2)
     public void generateLink() throws Exception {
         Event var1 = eventFactory.generateRandomEvent(user);
         Event event = eventFactory.save(var1);
 
         String token = this.mockMvc
-                .perform(postJson("/api/v1/reserved/link", event.getId()))
+                .perform(get("/api/v1/reserved/link?eventId=" + event.getId()))
                 .andDo(print())
                 .andExpectAll(status().isOk(),
                               content().contentType(MediaType.APPLICATION_JSON),
@@ -110,63 +120,76 @@ public class ReservedTest {
         Assertions.assertEquals(var3, var1);
     }
 
-    @DisplayName("Return event gifts")
+    @DisplayName("Return event info with list of gifts")
     @Test
-    @Order(3)
-    public void returnListOfEventGifts() throws Exception {
-        giftFactory.clear();
-        eventFactory.clear();
+    public void returnEventInfoWithGifts() throws Exception {
         Event var1 = eventFactory.generateRandomEvent(user);
         List<Gift> gifts = giftFactory.saveAll(giftFactory.generateRandomGift(2, user));
-//        gifts.forEach(var1::addGift);
-        Event event = eventFactory.save(var1);
-        String token = jwtUtils.generateReservedToken(user.getId(), event);
-
-        this.mockMvc
-                .perform(getJson("/api/v1/reserved/gift?token=" + token))
-                .andDo(print())
-                .andExpectAll(status().isOk(),
-                              content().contentType(MediaType.APPLICATION_JSON),
-                              jsonPath("$.size()", is(gifts.size())));
-    }
-
-    @DisplayName("Return event gifts")
-    @Test
-    @Order(4)
-    public void returnEventInfo() throws Exception {
-        giftFactory.clear();
-        eventFactory.clear();
-        Event var1 = eventFactory.generateRandomEvent(user);
-        List<Gift> gifts = giftFactory.saveAll(giftFactory.generateRandomGift(2, user));
-//        gifts.forEach(var1::addGift);
+        var1.addGift(new HashSet<>(gifts));
         Event event = eventFactory.save(var1);
         String token = jwtUtils.generateReservedToken(user.getId(), event);
 
         this.mockMvc
                 .perform(getJson("/api/v1/reserved/event?token=" + token))
                 .andDo(print())
-                .andExpectAll(status().isOk(),
-                              content().contentType(MediaType.APPLICATION_JSON),
+                .andExpectAll(status().isOk(), content().contentType(MediaType.APPLICATION_JSON),
                               jsonPath("$.id", is(((Number) event.getId()).intValue())),
-                              jsonPath("$.giftsSet", contains(gifts
-                                                                      .stream()
-                                                                      .map(Gift::getId)
-                                                                      .map(Number::intValue)
-                                                                      .toArray())));
+                              jsonPath("$.name", is(event.getName())),
+                              jsonPath("$.description", is(event.getDescription())), jsonPath("$.date", is(event
+                                                                                                                   .getDate()
+                                                                                                                   .format(formatter))),
+                              jsonPath("$.giftsSet[*].id", containsInAnyOrder(gifts
+                                                                                      .stream()
+                                                                                      .map(Gift::getId)
+                                                                                      .map(Number::intValue)
+                                                                                      .toArray())),
+                              jsonPath("$.giftsSet[*].name", containsInAnyOrder(gifts
+                                                                                        .stream()
+                                                                                        .map(Gift::getName)
+                                                                                        .toArray())),
+                              jsonPath("$.giftsSet[*].link", containsInAnyOrder(gifts
+                                                                                        .stream()
+                                                                                        .map(Gift::getLink)
+                                                                                        .toArray())),
+                              jsonPath("$.giftsSet[*].picture", containsInAnyOrder(gifts
+                                                                                           .stream()
+                                                                                           .map(Gift::getPicture)
+                                                                                           .toArray())),
+                              jsonPath("$.giftsSet[*].description", containsInAnyOrder(gifts
+                                                                                               .stream()
+                                                                                               .map(Gift::getDescription)
+                                                                                               .toArray())),
+                              jsonPath("$.giftsSet[*].description", containsInAnyOrder(gifts
+                                                                                               .stream()
+                                                                                               .map(Gift::getDescription)
+                                                                                               .toArray())));
     }
 
-    @DisplayName("Reserve gift return list of ids reserved gifts")
+    @DisplayName("Return api error if token invalid")
+    @Test
+    public void returnErrorWhenTokenInvalid() throws Exception {
+        Event var1 = eventFactory.generateRandomEvent(user);
+        List<Gift> gifts = giftFactory.saveAll(giftFactory.generateRandomGift(2, user));
+        var1.addGift(new HashSet<>(gifts));
+        Event event = eventFactory.save(var1);
+        String token = jwtUtils.generateReservedToken(user.getId(), event);
+
+        this.mockMvc
+                .perform(getJson("/api/v1/reserved/event?token=" + token + "q"))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpectAll(isApiError("Reserved token not valid", "BAD_REQUEST"));
+    }
+
+    @DisplayName("Reserve gift return list of reserved gifts")
     @WithMockAppUser(id = "2", email = "existed@user.com")
     @Test
-    @Order(5)
-    public void reserveReturnListOfIds() throws Exception {
-        giftFactory.clear();
-        eventFactory.clear();
+    public void reserveReturnListOfReservedGifts() throws Exception {
         User holderUser = userFactory.save(userFactory.getExistedUser());
 
         Event var1 = eventFactory.generateRandomEvent(user);
         List<Gift> gifts = giftFactory.saveAll(giftFactory.generateRandomGift(2, user));
-//        gifts.forEach(var1::addGift);
+        gifts.forEach(var1::addGift);
         Event event = eventFactory.save(var1);
         String token = jwtUtils.generateReservedToken(user.getId(), event);
 
@@ -179,18 +202,20 @@ public class ReservedTest {
                 .getId()).intValue());
 
         this.mockMvc
-                .perform(putJson("/api/v1/reserved/gift?token=" + token, reservedId))
+                .perform(put("/api/v1/reserved/gift?token=" + token + "&giftsId=" + reservedId.get(
+                        0) + "," + reservedId.get(1)).with(csrf()))
                 .andDo(print())
-                .andExpectAll(status().isOk(),
-                              content().contentType(MediaType.APPLICATION_JSON),
-                              jsonPath("$[*]", containsInAnyOrder(reservedId.toArray())));
+                .andExpectAll(status().isOk(), content().contentType(MediaType.APPLICATION_JSON),
+                              jsonPath("$[*].id", containsInAnyOrder(reservedId.toArray())));
 
+        Set<Gift> givingGiftsSet = userFactory.getGivingGiftsSet(holderUser.getId());
+        Assertions.assertNotNull(givingGiftsSet);
+        Assertions.assertFalse(givingGiftsSet.isEmpty());
         for (Gift gift : gifts) {
-            Gift reservedGift = giftFactory.getGiftById(gift.getId());
-            Assertions.assertNotNull(reservedGift);
-            Assertions.assertFalse(reservedGift
-                                           .getGiversSet()
-                                           .isEmpty());
+            Assertions.assertTrue(givingGiftsSet.contains(gift));
+        }
+        for (Gift gift : givingGiftsSet) {
+            Assertions.assertEquals(gift.getStatus(), GiftStatus.RESERVED);
         }
     }
 }

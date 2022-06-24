@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.EventDto;
+import ru.rumal.wishlist.model.dto.GiftDto;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -39,7 +40,7 @@ public class Event implements BaseEntity {
     @JoinTable(name = "_event_gift",
             joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "gift_id"))
-    private Set<Gift> gifts;
+    private Set<Gift> gifts = new HashSet<>();
 
     public Event(Long id) {
         this.id = id;
@@ -55,6 +56,7 @@ public class Event implements BaseEntity {
                             this.gifts
                                     .stream()
                                     .map(Gift::toBaseDto)
+                                    .map(baseDto -> (GiftDto) baseDto)
                                     .collect(Collectors.toSet()));
         //  @formatter:on
     }
@@ -75,8 +77,6 @@ public class Event implements BaseEntity {
     }
 
     public void addGift(@NotNull Gift gift) {
-        if (this.gifts == null)
-            this.gifts = new HashSet<>();
         this.gifts.add(gift);
     }
 

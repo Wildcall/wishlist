@@ -52,7 +52,7 @@ public class GiftFacadeImpl implements GiftFacade {
                           GiftDto giftDto) {
         String userId = principal.getName();
 
-        if (giftService.getCountByUserId(userId) > giftLimit) throw new BadRequestException(
+        if (giftService.getCountByUserId(userId) >= giftLimit) throw new BadRequestException(
                 "You can't create more then " + giftLimit + " gifts");
 
         Gift gift = (Gift) giftDto.toBaseEntity();
@@ -94,12 +94,11 @@ public class GiftFacadeImpl implements GiftFacade {
 
     @Override
     public Long delete(Principal principal,
-                       Long id) {
-
+                       Long giftId) {
         String userId = principal.getName();
 
-        if (giftService.deleteByIdAndUserId(id, userId)) return id;
-        throw new BadRequestException("Gift not found");
+        if (giftService.deleteByIdAndUserId(giftId, userId)) return giftId;
+        throw new BadRequestException("Gift with id '" + giftId + "' not found");
     }
 
     private Tag checkTagAvailable(Long tagId,

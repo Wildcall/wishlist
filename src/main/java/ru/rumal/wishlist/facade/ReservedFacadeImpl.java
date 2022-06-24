@@ -3,14 +3,16 @@ package ru.rumal.wishlist.facade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.exception.BadRequestException;
 import ru.rumal.wishlist.model.GiftStatus;
 import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.entity.Event;
 import ru.rumal.wishlist.model.entity.Gift;
+import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.service.EventService;
-import ru.rumal.wishlist.service.GiftService;
 import ru.rumal.wishlist.service.JwtUtils;
+import ru.rumal.wishlist.service.UserService;
 
 import java.security.Principal;
 import java.util.List;
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 public class ReservedFacadeImpl implements ReservedFacade {
 
-    private final GiftService giftService;
+    private final UserService userService;
     private final EventService eventService;
     private final JwtUtils jwtUtils;
 
@@ -37,41 +39,43 @@ public class ReservedFacadeImpl implements ReservedFacade {
     }
 
     @Override
-    public Set<BaseDto> getGifts(String token) {
-        Event existedEvent = getExistedEvent(token);
-        return existedEvent
-                .getGifts()
-                .stream()
-                .map(Gift::toBaseDto)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
     public BaseDto getEvent(String token) {
         return getExistedEvent(token).toBaseDto();
     }
 
+    @Transactional
     @Override
-    public List<Long> reserveGift(Principal principal,
-                                  List<Long> giftsId,
-                                  String token) {
+    public List<BaseDto> reserveGift(Principal principal,
+                                     List<Long> giftsId,
+                                     String token) {
         String userId = principal.getName();
-        Event event = getExistedEvent(token);
-        boolean var1 = event
-                .getGifts()
-                .stream()
-                .anyMatch(g -> g.getStatus() != GiftStatus.NEW);
-        if (var1)
-            throw new BadRequestException("One of gifts already reserved or received!");
+        User user = userService
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("User not found!"));
+        if (giftsId != null) {
+            Event event = getExistedEvent(token);
+            Set<Gift> gifts = event.getGifts();
 
-        for (Long giftId : giftsId) {
-            if (!event
-                    .getGifts()
-                    .contains(new Gift(giftId)))
-                throw new BadRequestException("Gift with id '" + giftId + "' not found!");
+            //  @formatter:off
+            for (Long giftId : giftsId) {
+                Gift gift = gifts
+                        .stream()
+                        .filter(g -> g.getId().equals(giftId))
+                        .findFirst()
+                        .orElseThrow(() -> new BadRequestException("Gift with id '" + giftId + "' not found!"));
+                if (!gift.getStatus().equals(GiftStatus.NEW))
+                    throw new BadRequestException("Gift with id '" + gift.getId() +"' already reserved or received!");
+                gift.setStatus(GiftStatus.RESERVED);
+                user.getGivingGiftsSet().add(gift);
+            }
+            //  @formatter:on
+            userService.save(user);
         }
-        giftService.reserveList(userId, giftsId);
-        return giftsId;
+        return user
+                .getGivingGiftsSet()
+                .stream()
+                .map(Gift::toBaseDto)
+                .collect(Collectors.toList());
     }
 
     private Event getExistedEvent(String token) {

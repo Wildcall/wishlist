@@ -47,20 +47,4 @@ public class GiftServiceImpl implements GiftService {
                                             String userId) {
         return giftRepo.findByIdAndUserId(id, userId);
     }
-
-    @Override
-    public void reserveList(String userId,
-                            List<Long> giftsId) {
-        for (Long id : giftsId) {
-            giftRepo
-                    .findById(id)
-                    .ifPresent(value -> {
-                        value
-                                .getGiversSet()
-                                .add(new User(userId));
-                        value.setStatus(GiftStatus.RESERVED);
-                        giftRepo.save(value);
-                    });
-        }
-    }
 }

@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.integration.context.WithMockAppUser;
 import ru.rumal.wishlist.integration.utils.*;
 import ru.rumal.wishlist.model.GiftStatus;
@@ -40,7 +41,6 @@ import static ru.rumal.wishlist.integration.utils.HttpResponseApiError.isApiErro
 @Import({TestUserFactory.class, TestGiftFactory.class, TestEventFactory.class, TestTagFactory.class, ResultActionUtils.class})
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class GiftTest {
 
@@ -68,9 +68,14 @@ public class GiftTest {
         userFactory.clear(user.getId());
     }
 
+    @BeforeEach
+    public void eachSetup() {
+        eventFactory.clear();
+        giftFactory.clear();
+    }
+
     @DisplayName("Pass if all endpoint is secure")
     @Test
-    @Order(1)
     public void checkApiSecure() {
         Stream
                 .of(get("/api/v1/gift"), post("/api/v1/gift"), put("/api/v1/gift/1"), delete("/api/v1/gift/1"))
@@ -87,24 +92,10 @@ public class GiftTest {
                 });
     }
 
-    @DisplayName("Delete return api error if gift with expected id not found")
-    @WithMockAppUser
-    @Test
-    @Order(2)
-    public void deleteReturnApiError() throws Exception {
-        this.mockMvc
-                .perform(delete("/api/v1/gift/" + 1).with(csrf()))
-                .andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpectAll(isApiError("Gift not found", "BAD_REQUEST"));
-    }
-
     @DisplayName("Create return gift with id")
     @WithMockAppUser
     @Test
-    @Order(3)
     public void createReturnGiftWithId() throws Exception {
-        giftFactory.clear();
         String name = "New gift";
 
         Map<String, String> giftMap = new HashMap<>();
@@ -124,25 +115,16 @@ public class GiftTest {
                                               jsonPath("$.picture").hasJsonPath(),
                                               jsonPath("$.description").hasJsonPath(),
                                               jsonPath("$.status", is(GiftStatus.NEW.name())),
-                                              jsonPath("$.eventsId").isArray(),
                                               jsonPath("$.tagId").hasJsonPath()));
 
-        Gift gift = giftFactory.getGiftById(id);
-        Assertions.assertNotNull(gift);
-        Assertions.assertEquals(gift.getUser().getId(), user.getId());
-        Assertions.assertNull(gift.getTag());
-
-        Assertions.assertTrue(gift.getGiversSet().isEmpty());
-        Assertions.assertTrue(gift.getEventsSet().isEmpty());
+        compareGift(id, user.getId(), null, name, null, null, null, GiftStatus.NEW);
         //  @formatter:on
     }
 
-    @DisplayName("Create return gift with id and binding with event and tag")
+    @DisplayName("Create return gift with tag bind")
     @WithMockAppUser
     @Test
-    @Order(4)
-    public void createReturnGiftWithIdAndBindWithEventAndTag() throws Exception {
-        Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
+    public void createReturnGiftWithTagBind() throws Exception {
         Tag tag = tagFactory.save(tagFactory.generateRandomTag(user));
 
         String name = "New gift";
@@ -150,6 +132,37 @@ public class GiftTest {
         Map<String, Object> giftMap = new HashMap<>();
         giftMap.put("name", name);
         giftMap.put("tagId", tag.getId());
+
+        //  @formatter:off
+        Long id = resultActionUtils
+                .extractLongId(
+                        this.mockMvc
+                                .perform(HttpRequestBuilder.postJson("/api/v1/gift", giftMap))
+                                .andDo(print())
+                                .andExpectAll(status().isCreated(),
+                                              content().contentType("application/json"),
+                                              jsonPath("$.id").hasJsonPath(),
+                                              jsonPath("$.name", is(name)),
+                                              jsonPath("$.link").hasJsonPath(),
+                                              jsonPath("$.picture").hasJsonPath(),
+                                              jsonPath("$.description").hasJsonPath(),
+                                              jsonPath("$.status", is(GiftStatus.NEW.name())),
+                                              jsonPath("$.tagId", is(((Number) tag.getId()).intValue()))));
+        //  @formatter:on
+
+        compareGift(id, user.getId(), tag, name, null, null, null, GiftStatus.NEW);
+    }
+
+    @DisplayName("Create return gift with event bind")
+    @WithMockAppUser
+    @Test
+    public void createReturnGiftWithEventBind() throws Exception {
+        Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
+
+        String name = "New gift";
+
+        Map<String, Object> giftMap = new HashMap<>();
+        giftMap.put("name", name);
         giftMap.put("eventId", event.getId());
 
         //  @formatter:off
@@ -166,24 +179,33 @@ public class GiftTest {
                                               jsonPath("$.picture").hasJsonPath(),
                                               jsonPath("$.description").hasJsonPath(),
                                               jsonPath("$.status", is(GiftStatus.NEW.name())),
-                                              jsonPath("$.eventsId").isArray(),
-                                              jsonPath("$.tagId", is(((Number) tag.getId()).intValue()))));
+                                              jsonPath("$.tagId").hasJsonPath()));
 
-        Gift gift = giftFactory.getGiftById(id);
-        Assertions.assertNotNull(gift);
-        Assertions.assertEquals(gift.getTag(), tag);
-        Assertions.assertTrue(gift.getEventsSet().contains(event));
-        Assertions.assertEquals(gift.getUser().getId(), user.getId());
-        Assertions.assertTrue(gift.getGiversSet().isEmpty());
         //  @formatter:on
+        compareGift(id, user.getId(), null, name, null, null, null, GiftStatus.NEW);
     }
 
-    @DisplayName("Create return gift with id and binding with event and tag")
+    @DisplayName("Create gift return api error when tag not found")
     @WithMockAppUser
     @Test
-    @Order(5)
-    public void createReturnErrorIfTagOrEventNotFound() throws Exception {
+    public void createReturnErrorIfTagNotFound() throws Exception {
         String name = "New gift";
+
+        Map<String, Object> giftMap = new HashMap<>();
+        giftMap.put("name", name);
+        giftMap.put("tagId", Long.MAX_VALUE);
+        this.mockMvc
+                .perform(HttpRequestBuilder.postJson("/api/v1/gift", giftMap))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpectAll(isApiError("Tag with id: '" + Long.MAX_VALUE + "' not found", "BAD_REQUEST"));
+    }
+
+    @DisplayName("Create gift return api error when event not found")
+    @WithMockAppUser
+    @Test
+    public void createGiftReturnErrorWhenEventNotFound() throws Exception {
+        String name = "New name";
 
         Map<String, Object> giftMap = new HashMap<>();
         giftMap.put("name", name);
@@ -193,21 +215,31 @@ public class GiftTest {
                 .perform(HttpRequestBuilder.postJson("/api/v1/gift", giftMap))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpectAll(isApiError("Event with id: '" + Long.MAX_VALUE + "' not found", "BAD_REQUEST"));
+                .andExpectAll(isApiError("Event with id '" + Long.MAX_VALUE + "' not found!", "BAD_REQUEST"));
+    }
 
-        giftMap.remove("eventId");
-        giftMap.put("tagId", Long.MAX_VALUE);
+    @DisplayName("Create return api error when try to create more then ${limits.event} gifts")
+    @WithMockAppUser
+    @Test
+    public void createReturnApiErrorWhenEventsCountMoreThenLimit() throws Exception {
+        List<Gift> gifts = giftFactory.generateRandomGift(giftLimit, user);
+        giftFactory.saveAll(gifts);
+
+        String name = "New event";
+
+        Map<String, String> giftMap = new HashMap<>();
+        giftMap.put("name", name);
+
         this.mockMvc
                 .perform(HttpRequestBuilder.postJson("/api/v1/gift", giftMap))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpectAll(isApiError("Tag with id: '" + Long.MAX_VALUE + "' not found", "BAD_REQUEST"));
+                .andExpectAll(isApiError("You can't create more then " + giftLimit + " gifts", "BAD_REQUEST"));
     }
 
     @DisplayName("Update gift return updated gift")
     @WithMockAppUser
     @Test
-    @Order(6)
     public void updateGiftReturnUpdatedGift() throws Exception {
         Tag tag = tagFactory.save(tagFactory.generateRandomTag(user));
         Gift gift = giftFactory.save(giftFactory.generateRandomGift(user));
@@ -240,25 +272,15 @@ public class GiftTest {
                                               jsonPath("$.picture").hasJsonPath(),
                                               jsonPath("$.description").hasJsonPath(),
                                               jsonPath("$.status", is(status.name())),
-                                              jsonPath("$.eventsId").isArray(),
                                               jsonPath("$.tagId", is(((Number) tag.getId()).intValue()))));
 
-        Gift updatedGift = giftFactory.getGiftById(id);
-        Assertions.assertNotNull(updatedGift);
-        Assertions.assertEquals(updatedGift.getTag(), tag);
-        Assertions.assertEquals(updatedGift.getUser().getId(), user.getId());
-        Assertions.assertEquals(updatedGift.getName(), name);
-        Assertions.assertEquals(updatedGift.getLink(), link);
-        Assertions.assertEquals(updatedGift.getPicture(), picture);
-        Assertions.assertEquals(updatedGift.getDescription(), description);
-        Assertions.assertEquals(updatedGift.getStatus(), status);
+        compareGift(id, user.getId(), tag, name, link, picture, description, status);
         //  @formatter:on
     }
 
     @DisplayName("Update gift return api error when tag not found")
     @WithMockAppUser
     @Test
-    @Order(7)
     public void updateGiftReturnErrorWhenTagNotFound() throws Exception {
         Gift gift = giftFactory.save(giftFactory.generateRandomGift(user));
 
@@ -273,13 +295,11 @@ public class GiftTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpectAll(isApiError("Tag with id: '" + Long.MAX_VALUE + "' not found", "BAD_REQUEST"));
-
     }
 
     @DisplayName("Delete return gift id when success")
     @WithMockAppUser
     @Test
-    @Order(8)
     public void deleteReturnLong() throws Exception {
         Gift gift = giftFactory.save(giftFactory.generateRandomGift(user));
 
@@ -295,31 +315,20 @@ public class GiftTest {
         Assertions.assertNull(savedGift);
     }
 
-    @DisplayName("Create return api error when try to create more then ${limits.event} gifts")
+    @DisplayName("Delete return api error if gift with expected id not found")
     @WithMockAppUser
     @Test
-    @Order(9)
-    public void createReturnApiErrorWhenEventsCountMoreThenLimit() throws Exception {
-        List<Gift> gifts = giftFactory.generateRandomGift(giftLimit, user);
-        giftFactory.saveAll(gifts);
-
-        String name = "New event";
-
-        Map<String, String> giftMap = new HashMap<>();
-        giftMap.put("name", name);
-
+    public void deleteReturnApiError() throws Exception {
         this.mockMvc
-                .perform(HttpRequestBuilder.postJson("/api/v1/gift", giftMap))
+                .perform(delete("/api/v1/gift/" + 1).with(csrf()))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
-                .andExpectAll(isApiError("You can't create more then " + giftLimit + " gifts", "BAD_REQUEST"));
-        giftFactory.clear();
+                .andExpectAll(isApiError("Gift with id '" + 1 + "' not found", "BAD_REQUEST"));
     }
 
     @DisplayName("Get all return list of gifts")
     @WithMockAppUser
     @Test
-    @Order(10)
     public void getAllReturnListOfGift() throws Exception {
         List<Gift> gifts = giftFactory.saveAll(giftFactory.generateRandomGift(5, user));
 
@@ -335,9 +344,34 @@ public class GiftTest {
                               jsonPath("$[*].description", containsInAnyOrder(gifts.stream().map(Gift::getDescription).toArray())),
                               jsonPath("$[*].picture", containsInAnyOrder(gifts.stream().map(Gift::getPicture).toArray())),
                               jsonPath("$[*].status", containsInAnyOrder(gifts.stream().map(Gift::getStatus).map(GiftStatus::name).toArray())),
-                              jsonPath("$[*].tagId").hasJsonPath(),
-                              jsonPath("$[*].eventsId").hasJsonPath());
+                              jsonPath("$[*].tagId").hasJsonPath());
         //  @formatter:on
-        giftFactory.clear();
+    }
+
+    @Transactional
+    public void compareGift(Long giftId,
+                             String userId,
+                             Tag tag,
+                             String name,
+                             String link,
+                             String picture,
+                             String description,
+                             GiftStatus status) {
+        Gift updatedGift = giftFactory.getGiftById(giftId);
+        Assertions.assertNotNull(updatedGift);
+        if (userId != null)
+            Assertions.assertEquals(updatedGift.getUser().getId(), userId);
+        if (tag != null)
+            Assertions.assertEquals(updatedGift.getTag(), tag);
+        if (name != null)
+            Assertions.assertEquals(updatedGift.getName(), name);
+        if (link != null)
+            Assertions.assertEquals(updatedGift.getLink(), link);
+        if (picture != null)
+            Assertions.assertEquals(updatedGift.getPicture(), picture);
+        if (description != null)
+            Assertions.assertEquals(updatedGift.getDescription(), description);
+        if (status != null)
+            Assertions.assertEquals(updatedGift.getStatus(), status);
     }
 }

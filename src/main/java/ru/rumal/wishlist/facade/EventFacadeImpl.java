@@ -16,7 +16,9 @@ import ru.rumal.wishlist.service.EventService;
 import ru.rumal.wishlist.service.GiftService;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,7 +35,7 @@ public class EventFacadeImpl implements EventFacade {
     private int eventLimit;
 
     @Override
-    public List<BaseDto> getAllByUser(Principal principal) {
+    public List<BaseDto> getAllByUser(@NotNull Principal principal) {
         String userId = principal.getName();
         List<Event> events = eventService.findAllByUserId(userId);
         return events
@@ -44,9 +46,11 @@ public class EventFacadeImpl implements EventFacade {
 
     @Transactional
     @Override
-    public BaseDto create(Principal principal,
-                          EventDto eventDto) {
+    public BaseDto create(@NotNull Principal principal,
+                          @NotNull EventDto eventDto) {
         String userId = principal.getName();
+
+        checkDate(eventDto);
 
         if (eventService.getCountByUserId(userId) >= eventLimit)
             throw new BadRequestException("You can't create more then " + eventLimit + " events");
@@ -61,13 +65,16 @@ public class EventFacadeImpl implements EventFacade {
 
     @Transactional
     @Override
-    public BaseDto update(Principal principal,
-                          Long eventId,
-                          EventDto eventDto) {
+    public BaseDto update(@NotNull Principal principal,
+                          @NotNull Long eventId,
+                          @NotNull EventDto eventDto) {
         String userId = principal.getName();
+
+        checkDate(eventDto);
+
         Event existedEvent = eventService
                 .findByIdAndUserId(eventId, userId)
-                .orElseThrow(() -> new BadRequestException("Event with id '" + eventId + "' not found"));
+                .orElseThrow(() -> new BadRequestException("Event with id '" + eventId + "' not found!"));
 
         Event event = (Event) eventDto.toBaseEntity();
         event.addGift(checkGiftAvailable(eventDto.getGiftsIdSet(), userId));
@@ -80,11 +87,18 @@ public class EventFacadeImpl implements EventFacade {
     }
 
     @Override
-    public Long delete(Principal principal,
-                       Long id) {
+    public Long delete(@NotNull Principal principal,
+                       @NotNull Long eventId) {
         String userId = principal.getName();
-        if (eventService.deleteByIdAndUserId(id, userId)) return id;
-        throw new BadRequestException("Event not found");
+        if (eventService.deleteByIdAndUserId(eventId, userId)) return eventId;
+        throw new BadRequestException("Event with id '" + eventId + "' not found!");
+    }
+
+    private void checkDate(EventDto eventDto) {
+        if (eventDto.getDate() != null && eventDto
+                .getDate()
+                .isBefore(LocalDateTime.now()))
+            throw new BadRequestException("Date of event must be in future");
     }
 
     private Set<Gift> checkGiftAvailable(Set<Long> giftsIdSet,

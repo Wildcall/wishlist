@@ -13,7 +13,6 @@ import ru.rumal.wishlist.model.dto.View;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,20 +22,10 @@ public class ReservedController {
 
     private final ReservedFacade reservedFacade;
 
-    @PostMapping(path = ("link"), produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = ("link"), produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> generateLink(Principal principal,
-                                               @RequestBody Long eventId) {
+                                               @RequestParam Long eventId) {
         String response = reservedFacade.generateLink(principal, eventId);
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
-    }
-
-    @GetMapping(path = "gift", produces = MediaType.APPLICATION_JSON_VALUE)
-    @JsonView(View.Response.class)
-    public ResponseEntity<Set<BaseDto>> getGifts(@RequestParam String token) {
-        Set<BaseDto> response = reservedFacade.getGifts(token);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -54,10 +43,11 @@ public class ReservedController {
     }
 
     @PutMapping(path = "gift")
-    public ResponseEntity<List<Long>> reserveGift(Principal principal,
-                                                  @RequestParam String token,
-                                                  @RequestBody List<Long> giftsId) {
-        List<Long> response = reservedFacade.reserveGift(principal, giftsId, token);
+    @JsonView(View.Response.class)
+    public ResponseEntity<List<BaseDto>> reserveGift(Principal principal,
+                                                     @RequestParam String token,
+                                                     @RequestParam List<Long> giftsId) {
+        List<BaseDto> response = reservedFacade.reserveGift(principal, giftsId, token);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

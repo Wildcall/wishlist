@@ -17,7 +17,4 @@ public interface GiftService {
 
     Optional<Gift> findByIdAndUserId(Long giftId,
                                      String userId);
-
-    void reserveList(String userId,
-                     List<Long> giftsId);
 }

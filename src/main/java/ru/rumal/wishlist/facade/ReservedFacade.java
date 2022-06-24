@@ -10,9 +10,7 @@ public interface ReservedFacade {
     String generateLink(Principal principal,
                         Long eventId);
 
-    Set<BaseDto> getGifts(String token);
-
-    List<Long> reserveGift(Principal principal,
+    List<BaseDto> reserveGift(Principal principal,
                            List<Long> giftsId,
                            String token);
 

@@ -42,13 +42,13 @@ public class EventDto implements BaseDto {
 
     @Null(groups = {View.New.class, View.Update.class})
     @JsonView(View.Response.class)
-    private Set<BaseDto> giftsSet;
+    private Set<GiftDto> giftsSet;
 
     public EventDto(Long id,
                     String name,
                     String description,
                     LocalDateTime date,
-                    Set<BaseDto> giftsSet) {
+                    Set<GiftDto> giftsSet) {
         this.id = id;
         this.name = name;
         this.description = description;

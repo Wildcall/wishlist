@@ -38,11 +38,11 @@ public class UserFacadeImpl implements UserFacade {
     @Override
     public BaseDto getInfo(Principal principal) {
         String id = principal.getName();
-
-        return userService
+        User user = userService
                 .findById(id)
-                .orElseThrow(() -> new BadRequestException("User not found"))
-                .toBaseDto();
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        return user.toBaseDto();
     }
 
     @Override

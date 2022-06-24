@@ -11,7 +11,6 @@ import ru.rumal.wishlist.model.dto.GiftDto;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -20,6 +19,7 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "_gift")
 public class Gift implements BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,23 +35,34 @@ public class Gift implements BaseEntity {
     private User user;
 
     @ToString.Exclude
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "givingGiftsSet")
-    private Set<User> giversSet = new HashSet<>();
+    @ManyToMany(mappedBy = "givingGiftsSet", fetch = FetchType.LAZY)
+    private Set<User> giversSet;
 
     @ToString.Exclude
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "gifts")
-    private Set<Event> eventsSet = new HashSet<>();
+    @ManyToMany(mappedBy = "gifts", fetch = FetchType.LAZY)
+    private Set<Event> eventsSet;
 
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.EAGER)
     private Tag tag;
 
-    public boolean addEvent(Event event) {
-        return this.eventsSet.add(event);
+    public Gift(Long id) {
+        this.id = id;
+    }
+
+    public void setEvent(Event event) {
+        this.eventsSet = new HashSet<>(1);
+        eventsSet.add(event);
+    }
+
+    public void setGiver(User user) {
+        this.giversSet = new HashSet<>(1);
+        giversSet.add(user);
     }
 
     @Override
     public BaseDto toBaseDto() {
+        //  @formatter:off
         return new GiftDto(
                 this.id,
                 this.name,
@@ -59,11 +70,8 @@ public class Gift implements BaseEntity {
                 this.picture,
                 this.description,
                 this.status != null ? this.status.name() : null,
-                this.eventsSet
-                        .stream()
-                        .map(Event::getId)
-                        .collect(Collectors.toSet()),
                 this.tag != null ? this.tag.getId() : null);
+        //  @formatter:on
     }
 
     @Override

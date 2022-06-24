@@ -68,10 +68,11 @@ class EventDtoTest {
     private static Map<String, Object> getCorrectUpdateViewMap() {
         Map<String, Object> requestView = new HashMap<>();
         requestView.put("name", "New event");
+        requestView.put("description", "New description");
         requestView.put("date", LocalDateTime
                 .now()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-        requestView.put("giftsSet", new HashSet<>());
+        requestView.put("giftsIdSet", new HashSet<>());
         return requestView;
     }
 
@@ -123,17 +124,6 @@ class EventDtoTest {
         sb.add(Arguments.of(valid, null, true));
 
         map = getCorrectUpdateViewMap();
-        map.remove("giftsSet");
-        String giftsSetNotPresent = mapper.writeValueAsString(map);
-        sb.add(Arguments.of(giftsSetNotPresent, "giftsSet", true));
-
-        map = getCorrectUpdateViewMap();
-        map.remove("date");
-        String dateNotPresent = mapper.writeValueAsString(map);
-
-        sb.add(Arguments.of(dateNotPresent, "date", true));
-
-        map = getCorrectUpdateViewMap();
         map.remove("name");
         String nameNotPresent = mapper.writeValueAsString(map);
         sb.add(Arguments.of(nameNotPresent, "name", false));
@@ -149,6 +139,16 @@ class EventDtoTest {
                                 sb.add(Arguments.of(json, field, false));
                             } catch (JsonProcessingException ignored) {}
                         }));
+
+        Stream.of("date", "description", "giftsIdSet")
+                .forEach(field -> {
+                    try {
+                        Map<String, Object> correctNewViewMap = getCorrectUpdateViewMap();
+                        correctNewViewMap.remove(field);
+                        String json = mapper.writeValueAsString(correctNewViewMap);
+                        sb.add(Arguments.of(json, field, true));
+                    } catch (JsonProcessingException ignored) {}
+                });
         //  @formatter:on
         return sb.build();
     }

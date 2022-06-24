@@ -45,6 +45,10 @@ public class Tag implements BaseEntity {
         this.id = id;
     }
 
+    public void addGift(Gift gift) {
+        gifts.add(gift);
+    }
+
     @Override
     public BaseDto toBaseDto() {
         return new TagDto(this.id,

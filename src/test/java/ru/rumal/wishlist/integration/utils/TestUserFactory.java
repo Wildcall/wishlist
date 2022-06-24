@@ -1,13 +1,16 @@
 package ru.rumal.wishlist.integration.utils;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.Role;
+import ru.rumal.wishlist.model.entity.Gift;
 import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.UserRepo;
+
+import java.util.Set;
 
 @Getter
 @RequiredArgsConstructor
@@ -91,40 +94,24 @@ public class TestUserFactory {
                 .orElse(null);
     }
 
+    @Transactional
+    public Set<Gift> getGivingGiftsSet(String id) {
+        User user = userRepo
+                .findById(id)
+                .orElse(null);
+        if (user != null) {
+            Set<Gift> givingGiftsSet = user.getGivingGiftsSet();
+            givingGiftsSet.size();
+            return givingGiftsSet;
+        }
+        return null;
+    }
+
     public User save(User user) {
         return userRepo.save(user);
     }
 
     public void clear(String id) {
         userRepo.deleteById(id);
-    }
-
-    @Data
-    public static class UserRegistrationRequest {
-        private String email;
-        private String password;
-        private String name;
-
-        public User toUser() {
-            User user = new User();
-            user.setEmail(this.email);
-            user.setPassword(this.password);
-            user.setName(this.name);
-            user.setPicture("");
-            user.setEnable(true);
-            return user;
-        }
-    }
-
-    @Data
-    public static class UserUpdateInfoRequest {
-        private String email;
-        private String name;
-    }
-
-    @Data
-    public static class UserUpdatePasswordRequest {
-        private String password;
-        private String newPassword;
     }
 }

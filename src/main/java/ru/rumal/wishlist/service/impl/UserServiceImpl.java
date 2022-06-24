@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.model.AuthType;
 import ru.rumal.wishlist.model.Role;
 import ru.rumal.wishlist.model.entity.User;
@@ -18,7 +17,6 @@ import java.util.Random;
 
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -52,21 +50,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        return userRepo.findByEmail(email);
-    }
-
-    @Override
     public boolean existByEmail(String email) {
         return userRepo
                 .findByEmail(email)
-                .isPresent();
-    }
-
-    @Override
-    public boolean existById(String id) {
-        return userRepo
-                .findById(id)
                 .isPresent();
     }
 

@@ -20,6 +20,7 @@ import ru.rumal.wishlist.model.entity.User;
 import ru.rumal.wishlist.repository.EventRepo;
 
 import javax.validation.constraints.Min;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -131,10 +132,37 @@ public class EventTest {
         //  @formatter:on
     }
 
+    @DisplayName("Create return event with id")
+    @WithMockAppUser
+    @Test
+    @Order(5)
+    public void createReturnErrorWhenDateInPast() throws Exception {
+        String name = "New event";
+        String date = LocalDateTime
+                .now()
+                .minusDays(1)
+                .format(formatter);
+        String description = "description";
+
+        Map<String, String> eventMap = new HashMap<>();
+        eventMap.put("name", name);
+        eventMap.put("date", date);
+        eventMap.put("description", description);
+
+        //  @formatter:off
+        this.mockMvc
+                .perform(HttpRequestBuilder.postJson("/api/v1/event", eventMap))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpectAll(isApiError("Date of event must be in future", "BAD_REQUEST"));
+
+        //  @formatter:on
+    }
+
     @DisplayName("Delete return event id when success")
     @WithMockAppUser
     @Test
-    @Order(4)
+    @Order(5)
     public void deleteReturnLong() throws Exception {
 
         Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
@@ -154,7 +182,7 @@ public class EventTest {
     @DisplayName("Create return api error when try to create more then ${limits.event} events")
     @WithMockAppUser
     @Test
-    @Order(5)
+    @Order(6)
     public void createReturnApiErrorWhenEventsCountMoreThenLimit() throws Exception {
         eventFactory.saveAll(eventFactory.generateRandomEvent(20, user));
 
@@ -177,7 +205,7 @@ public class EventTest {
     @DisplayName("Update event return updated event")
     @WithMockAppUser
     @Test
-    @Order(6)
+    @Order(7)
     public void updateReturnUpdatedEvent() throws Exception {
         eventFactory.clear();
         Event event = eventFactory.save(eventFactory.generateRandomEvent(user));
@@ -228,7 +256,7 @@ public class EventTest {
     @DisplayName("Update event return updated event with bind to gift list")
     @WithMockAppUser
     @Test
-    @Order(7)
+    @Order(8)
     public void updateReturnUpdatedEventWithGiftBind() throws Exception {
         eventFactory.clear();
         giftFactory.clear();

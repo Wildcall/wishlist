@@ -2,8 +2,10 @@ package ru.rumal.wishlist.integration.utils;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.model.GiftStatus;
 import ru.rumal.wishlist.model.entity.Gift;
 import ru.rumal.wishlist.model.entity.User;
@@ -15,6 +17,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+@Slf4j
 @Getter
 @RequiredArgsConstructor
 @TestConfiguration
@@ -36,7 +39,7 @@ public class TestGiftFactory {
 
     public Gift generateRandomGift(User user) {
         Gift gift = new Gift();
-        gift.setName(String.valueOf(random.nextInt(1000)));
+        gift.setName("Gift-" + random.nextInt(1000));
         gift.setStatus(GiftStatus.NEW);
         gift.setLink(String.valueOf(random.nextInt(1000)));
         gift.setDescription(String.valueOf(random.nextInt(1000)));
@@ -57,7 +60,8 @@ public class TestGiftFactory {
                 .collect(Collectors.toList());
     }
 
-    public Gift findById(Long id) {
+    @Transactional
+    public Gift getGiftById(Long id) {
         return giftRepo
                 .findById(id)
                 .orElse(null);

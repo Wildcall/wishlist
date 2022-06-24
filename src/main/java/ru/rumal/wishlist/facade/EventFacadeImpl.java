@@ -4,13 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.exception.BadRequestException;
 import ru.rumal.wishlist.model.dto.BaseDto;
 import ru.rumal.wishlist.model.dto.EventDto;
-import ru.rumal.wishlist.model.entity.BasicEvent;
 import ru.rumal.wishlist.model.entity.Event;
 import ru.rumal.wishlist.model.entity.Gift;
 import ru.rumal.wishlist.model.entity.User;
+import ru.rumal.wishlist.service.CustomBeanUtils;
 import ru.rumal.wishlist.service.EventService;
 import ru.rumal.wishlist.service.GiftService;
 
@@ -32,6 +33,17 @@ public class EventFacadeImpl implements EventFacade {
     private int eventLimit;
 
     @Override
+    public List<BaseDto> getAllByUser(Principal principal) {
+        String userId = principal.getName();
+        List<Event> events = eventService.findAllByUserId(userId);
+        return events
+                .stream()
+                .map(Event::toBaseDto)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
     public BaseDto create(Principal principal,
                           EventDto eventDto) {
         String userId = principal.getName();
@@ -47,30 +59,23 @@ public class EventFacadeImpl implements EventFacade {
                 .toBaseDto();
     }
 
-    @Override
-    public List<BaseDto> getAllByUser(Principal principal) {
-        String userId = principal.getName();
-        List<Event> events = eventService.getAll(userId);
-        return events
-                .stream()
-                .map(Event::toBaseDto)
-                .collect(Collectors.toList());
-    }
-
+    @Transactional
     @Override
     public BaseDto update(Principal principal,
-                          Long id,
+                          Long eventId,
                           EventDto eventDto) {
         String userId = principal.getName();
-        Event event = (Event) eventDto.toBaseEntity();
-        event.setId(id);
-        event.setUser(new User(userId));
+        Event existedEvent = eventService
+                .findByIdAndUserId(eventId, userId)
+                .orElseThrow(() -> new BadRequestException("Event with id '" + eventId + "' not found"));
 
-        checkGiftAvailable(eventDto.getGiftsSet(), userId, event);
+        Event event = (Event) eventDto.toBaseEntity();
+        event.addGift(checkGiftAvailable(eventDto.getGiftsIdSet(), userId));
+
+        CustomBeanUtils.copyProperties(event, existedEvent, "id", "user");
 
         return eventService
-                .updateByIdAndUserId(event)
-                .orElseThrow(() -> new BadRequestException("Event not found"))
+                .save(existedEvent)
                 .toBaseDto();
     }
 
@@ -82,27 +87,18 @@ public class EventFacadeImpl implements EventFacade {
         throw new BadRequestException("Event not found");
     }
 
-    @Override
-    public List<BaseDto> getBasic() {
-        List<BasicEvent> basic = eventService.getBasic();
-
-        return basic
-                .stream()
-                .map(BasicEvent::toBaseDto)
-                .collect(Collectors.toList());
-    }
-
-    private void checkGiftAvailable(Set<Long> gifts,
-                                    String userId,
-                                    Event event) {
-        if (gifts != null) {
-            gifts
-                    .forEach(giftId -> {
-                        Gift gift = giftService
-                                .findByIdAndUserId(giftId, userId)
-                                .orElseThrow(() -> new BadRequestException("Gift with id: '" + giftId + "' not found"));
-                        event.addGift(gift);
-                    });
+    private Set<Gift> checkGiftAvailable(Set<Long> giftsIdSet,
+                                         String userId) {
+        if (giftsIdSet != null) {
+            return giftsIdSet
+                    .stream()
+                    .map(giftId ->
+                                 giftService
+                                         .findByIdAndUserId(giftId, userId)
+                                         .orElseThrow(() -> new BadRequestException(
+                                                 "Gift with id: '" + giftId + "' not found")))
+                    .collect(Collectors.toSet());
         }
+        return null;
     }
 }

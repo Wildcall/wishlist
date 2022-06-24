@@ -19,6 +19,4 @@ public interface EventFacade {
     BaseDto update(Principal principal,
                    Long id,
                    EventDto eventDto);
-
-    List<BaseDto> getBasic();
 }

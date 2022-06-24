@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 import ru.rumal.wishlist.integration.context.WithMockAppUser;
 import ru.rumal.wishlist.integration.utils.*;
 import ru.rumal.wishlist.model.GiftStatus;
@@ -43,7 +42,6 @@ import static ru.rumal.wishlist.integration.utils.HttpResponseApiError.isApiErro
 @TestPropertySource(locations = "classpath:application-test.properties")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Transactional
 public class GiftTest {
 
     //  @formatter:off
@@ -113,23 +111,27 @@ public class GiftTest {
         giftMap.put("name", name);
 
         //  @formatter:off
-        Long id = resultActionUtils.extractLongId(this.mockMvc
-                .perform(HttpRequestBuilder.postJson("/api/v1/gift", giftMap))
-                .andDo(print())
-                .andExpectAll(status().isCreated(), content().contentType("application/json"),
-                              jsonPath("$.id").hasJsonPath(),
-                              jsonPath("$.name", is(name)),
-                              jsonPath("$.link").hasJsonPath(),
-                              jsonPath("$.picture").hasJsonPath(),
-                              jsonPath("$.description").hasJsonPath(),
-                              jsonPath("$.status", is(GiftStatus.NEW.name())),
-                              jsonPath("$.eventsId").isArray(),
-                              jsonPath("$.tagId").hasJsonPath()));
+        Long id = resultActionUtils
+                .extractLongId(
+                        this.mockMvc
+                                .perform(HttpRequestBuilder.postJson("/api/v1/gift", giftMap))
+                                .andDo(print())
+                                .andExpectAll(status().isCreated(),
+                                              content().contentType("application/json"),
+                                              jsonPath("$.id").hasJsonPath(),
+                                              jsonPath("$.name", is(name)),
+                                              jsonPath("$.link").hasJsonPath(),
+                                              jsonPath("$.picture").hasJsonPath(),
+                                              jsonPath("$.description").hasJsonPath(),
+                                              jsonPath("$.status", is(GiftStatus.NEW.name())),
+                                              jsonPath("$.eventsId").isArray(),
+                                              jsonPath("$.tagId").hasJsonPath()));
 
-        Gift gift = giftFactory.findById(id);
+        Gift gift = giftFactory.getGiftById(id);
         Assertions.assertNotNull(gift);
         Assertions.assertEquals(gift.getUser().getId(), user.getId());
         Assertions.assertNull(gift.getTag());
+
         Assertions.assertTrue(gift.getGiversSet().isEmpty());
         Assertions.assertTrue(gift.getEventsSet().isEmpty());
         //  @formatter:on
@@ -167,7 +169,7 @@ public class GiftTest {
                                               jsonPath("$.eventsId").isArray(),
                                               jsonPath("$.tagId", is(((Number) tag.getId()).intValue()))));
 
-        Gift gift = giftFactory.findById(id);
+        Gift gift = giftFactory.getGiftById(id);
         Assertions.assertNotNull(gift);
         Assertions.assertEquals(gift.getTag(), tag);
         Assertions.assertTrue(gift.getEventsSet().contains(event));
@@ -241,7 +243,7 @@ public class GiftTest {
                                               jsonPath("$.eventsId").isArray(),
                                               jsonPath("$.tagId", is(((Number) tag.getId()).intValue()))));
 
-        Gift updatedGift = giftFactory.findById(id);
+        Gift updatedGift = giftFactory.getGiftById(id);
         Assertions.assertNotNull(updatedGift);
         Assertions.assertEquals(updatedGift.getTag(), tag);
         Assertions.assertEquals(updatedGift.getUser().getId(), user.getId());
@@ -289,7 +291,7 @@ public class GiftTest {
                               content().string(String.valueOf(gift.getId())));
 
         Assertions.assertNotNull(gift.getId());
-        Gift savedGift = giftFactory.findById(gift.getId());
+        Gift savedGift = giftFactory.getGiftById(gift.getId());
         Assertions.assertNull(savedGift);
     }
 

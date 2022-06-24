@@ -3,7 +3,6 @@ package ru.rumal.wishlist.model.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.rumal.wishlist.model.entity.BaseEntity;
@@ -17,7 +16,6 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EventDto implements BaseDto {
 
@@ -39,13 +37,28 @@ public class EventDto implements BaseDto {
     private LocalDateTime date;
 
     @Null(groups = {View.New.class})
+    @JsonView(View.Private.class)
+    private Set<Long> giftsIdSet;
+
+    @Null(groups = {View.New.class, View.Update.class})
     @JsonView(View.Response.class)
-    private Set<Long> giftsSet;
+    private Set<BaseDto> giftsSet;
+
+    public EventDto(Long id,
+                    String name,
+                    String description,
+                    LocalDateTime date,
+                    Set<BaseDto> giftsSet) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.date = date;
+        this.giftsSet = giftsSet;
+    }
 
     @Override
     public BaseEntity toBaseEntity() {
         Event event = new Event();
-        event.setId(this.id);
         event.setName(this.name);
         event.setDescription(this.description);
         event.setDate(this.date);

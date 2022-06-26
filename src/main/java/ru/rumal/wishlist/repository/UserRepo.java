@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface UserRepo extends CrudRepository<User, String> {
 
     Optional<User> findByEmail(String email);
+
+    void deleteByEmail(String email);
 }

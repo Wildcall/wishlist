@@ -6,6 +6,4 @@ public interface UserExtractor {
 
     void extractAndSave(String clientRegistrationId,
                         OidcUser oidcUser);
-
-    String extractEmail();
 }

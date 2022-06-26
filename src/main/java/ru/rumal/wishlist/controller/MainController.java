@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 
@@ -22,9 +23,12 @@ public class MainController implements ErrorController {
 
     @GetMapping
     public String getIndex(Principal principal,
-                           Model model) {
+                           Model model,
+                           @RequestParam(required = false) String token) {
         model.addAttribute("isDevMode", "dev".equals(profile));
         model.addAttribute("auth", principal != null);
+        if (token != null)
+            model.addAttribute("reserveToken", token);
         return "index";
     }
 

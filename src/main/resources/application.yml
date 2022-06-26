@@ -28,9 +28,16 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
 
+
 logging:
   level:
     root: INFO
     org:
       springframework:
         web: INFO
+
+secret: ${SECRET}
+limits:
+  event: 10
+  tag: 10
+  gift: 25

@@ -46,16 +46,6 @@ public class TagController {
                 .body(response);
     }
 
-    @GetMapping(path = "/basic", produces = MediaType.APPLICATION_JSON_VALUE)
-    @JsonView(View.Response.class)
-    public ResponseEntity<List<BaseDto>> getBasic() {
-        List<BaseDto> response = tagFacade.getAllBasic();
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(response);
-    }
-
     @PutMapping(path = "/{id}")
     @JsonView(View.Response.class)
     public ResponseEntity<BaseDto> update(Principal principal,

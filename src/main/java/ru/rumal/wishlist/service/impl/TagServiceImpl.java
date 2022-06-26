@@ -49,15 +49,6 @@ public class TagServiceImpl implements TagService {
         return Optional.empty();
     }
 
-    @Override
-    public List<BasicTag> getBasic() {
-        return StreamSupport
-                .stream(basicTagRepo
-                                .findAll()
-                                .spliterator(), false)
-                .collect(Collectors.toList());
-    }
-
     public Optional<Tag> findByIdAndUserId(Long id,
                                            String userId) {
         return tagRepo.findByIdAndUserId(id, userId);

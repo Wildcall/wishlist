@@ -38,6 +38,6 @@ logging:
 
 secret: ${SECRET}
 limits:
-  event: 20
+  event: 10
   tag: 10
   gift: 25

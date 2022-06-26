@@ -74,14 +74,4 @@ public class TagFacadeImpl implements TagFacade {
                 .orElseThrow(() -> new BadRequestException("Tag not found"))
                 .toBaseDto();
     }
-
-    @Override
-    public List<BaseDto> getAllBasic() {
-        List<BasicTag> basic = tagService.getBasic();
-
-        return basic
-                .stream()
-                .map(BasicTag::toBaseDto)
-                .collect(Collectors.toList());
-    }
 }

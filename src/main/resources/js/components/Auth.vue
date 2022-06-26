@@ -1,58 +1,127 @@
 <template>
-  <v-container class="d-flex justify-center">
-    <v-card max-width="500" min-width="300">
+  <v-container
+      class="d-flex justify-center"
+  >
+    <v-card max-width="500"
+            min-width="300"
+            :flat="$vuetify.breakpoint.mobile"
+    >
       <v-card-title class="justify-center">
         Войти
       </v-card-title>
-      <v-card-actions class="flex-column">
-        <v-img
-            v-if="!loginDialog"
-            @click="showLoginDialog"
-            contain
-            max-height="50"
-            max-width="200"
-            :src="emailSignin"
-        />
-        <v-form v-else>
-          <v-text-field>
-
-          </v-text-field>
-          <v-text-field>
-
-          </v-text-field>
-          <v-btn>Войти</v-btn>
-        </v-form>
-        <v-divider inset class="mt-4 mb-4" dark/>
-        <a :href="link">
-          <v-img
-              contain
-              max-height="50"
-              max-width="200"
-              :src="googleSignin"
+      <v-card-text>
+        <v-card flat
+                class="pa-4">
+          <v-text-field
+              v-if="registrationForm"
+              v-model="form.name"
+              type="text"
+              placeholder="Введите имя"
           />
-        </a>
-      </v-card-actions>
+          <v-text-field
+              v-model="form.email"
+              type="text"
+              placeholder="Введите почту"
+          />
+          <v-text-field
+              v-model="form.password"
+              type="password"
+              placeholder="Введите пароль"
+          />
+          <v-card-actions>
+            <v-row>
+              <v-col
+                  class="d-flex justify-center"
+                  cols="12">
+                <v-btn
+                    @click="authAction"
+                    color="white"
+                >
+                  {{ registrationForm ? 'Регистрация' : 'Войти' }}
+                </v-btn>
+              </v-col>
+              <v-col
+                  class="d-flex justify-center align-center"
+                  cols="12">
+                {{ registrationForm ? 'Уже есть аккаунт?' : 'Еще нет аккаунта?' }}
+                <v-btn
+                    small
+                    text
+                    @click="changeForm"
+                    class="font-weight-bold"
+                >
+                  {{ registrationForm ? 'Войти' : 'Создать' }}
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+        <div class="d-flex justify-center">или</div>
+        <div class="d-flex justify-center">
+          <a
+              :href="link"
+          >
+            <v-img
+                :src="googleOauthIcon"
+                contain/>
+          </a>
+        </div>
+      </v-card-text>
     </v-card>
   </v-container>
 </template>
 
 <script>
 
+import {useUserStore} from "../store/user";
+
 export default {
   name: "Auth",
 
+  setup() {
+    return {
+      userStore: useUserStore()
+    }
+  },
+
   data() {
     return {
-      loginDialog: false,
+      form: {
+        name: '',
+        email: '',
+        password: ''
+      },
+      loginForm: true,
+      registrationForm: false,
+
+      googleOauthIcon: '../assets/btn_google_light_normal_hdpi.9.png',
       link: '/oauth2/authorization/google',
-      googleSignin: '../assets/btn_google_signin.png',
-      emailSignin: '../assets/btn_email_signin.png'
     }
   },
 
   methods: {
-    showLoginDialog() {
-      this.loginDialog = true
+    changeForm() {
+      this.registrationForm = !this.registrationForm
+      this.resetForm()
+    },
+
+    async authAction() {
+      if (this.registrationForm)
+        this.registration()
+      else
+        this.login()
+    },
+
+    registration() {
+      this.userStore.registration(this.form.name, this.form.email, this.form.password)
+    },
+
+    login() {
+      this.userStore.login(this.form.email, this.form.password)
+    },
+
+    resetForm() {
+      this.form = {}
     }
   }
 }

@@ -18,6 +18,4 @@ public interface TagFacade {
     BaseDto update(Principal principal,
                    Long id,
                    TagDto tagDto);
-
-    List<BaseDto> getAllBasic();
 }

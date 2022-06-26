@@ -45,7 +45,7 @@ public class WebSecurityConfig {
                 .httpBasic().disable()
                 .authorizeRequests(r -> r
                         .antMatchers("/js/*", "/assets/*").permitAll()
-                        .antMatchers(HttpMethod.GET, "/", "/error", "/favicon.ico").permitAll()
+                        .antMatchers(HttpMethod.GET, "/", "/error", "/error*", "/login*", "/favicon.ico").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/user/registration").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .antMatchers(HttpMethod.GET, "/api/v1/auth/logout").permitAll()
@@ -62,7 +62,8 @@ public class WebSecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .defaultSuccessUrl("/")
                         .userInfoEndpoint(userInfo -> userInfo
-                                .oidcUserService(this.oidcUserService())))
+                                .oidcUserService(this.oidcUserService()))
+                        .failureUrl("/"))
                 .addFilter(customAuthenticationFilter)
                 .logout(l -> l
                         .logoutUrl("/api/v1/auth/logout")

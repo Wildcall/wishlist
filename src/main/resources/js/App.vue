@@ -1,42 +1,47 @@
 <template>
   <v-app>
-    <v-app-bar app>
-      <v-container class="d-flex justify-end">
-        <v-btn
-            v-if="isAuth"
-            href="/api/v1/auth/logout"
-            text
-            plain
-        >
-          Logout
-        </v-btn>
-      </v-container>
-    </v-app-bar>
     <v-main>
-      <auth v-if="!isAuth"/>
-      <about v-if="isAuth"/>
+      <reserve v-if="reserveToken"
+               :token="reserveToken"
+      />
+      <div v-else>
+        <auth v-if="!this.userStore.getAuth"/>
+        <Main v-if="this.userStore.getAuth"/>
+      </div>
     </v-main>
   </v-app>
 </template>
 
 <script lang="js">
 import Auth from "./components/Auth.vue";
-import About from "./components/About.vue";
+import Reserve from "./components/Reserve.vue";
+import {useUserStore} from "./store/user";
+import NavBar from "./components/ui/nav-bar.vue";
+import Main from "./components/Main.vue";
 
 export default {
   name: 'App',
 
-  components: {About, Auth},
+  components: {Main, NavBar, Auth, Reserve},
+
+  setup() {
+    return {
+      userStore: useUserStore()
+    }
+  },
 
   data() {
     return {
-      isAuth: auth
+      reserveToken: reserveToken
     }
   },
 
   methods: {},
 
   mounted() {
+    if (auth) {
+      this.userStore.info()
+    }
   }
 }
 </script>

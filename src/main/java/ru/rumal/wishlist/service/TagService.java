@@ -1,6 +1,5 @@
 package ru.rumal.wishlist.service;
 
-import ru.rumal.wishlist.model.entity.BasicTag;
 import ru.rumal.wishlist.model.entity.Tag;
 
 import java.util.List;
@@ -17,8 +16,6 @@ public interface TagService {
     Optional<Tag> updateByIdAndUserId(Long id,
                                       String userId,
                                       Tag tag);
-
-    List<BasicTag> getBasic();
 
     Optional<Tag> findByIdAndUserId(Long tagId,
                                     String userId);
